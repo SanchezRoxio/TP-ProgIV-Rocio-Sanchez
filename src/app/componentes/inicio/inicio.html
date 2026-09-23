@@ -6,7 +6,7 @@
        <!-- directiva estructural personalizada -->
       <button class="pixel-btn-candy" *appAdmin="'admin'" routerLink="/admin">ADMIN ⚙️</button>
   
-      <button class="pixel-btn-candy" routerLink="/candy">CANDY BAR 🍿</button>  
+      <!--<button class="pixel-btn-candy" routerLink="/candy">CANDY BAR 🍿</button>  -->
       @if (usuarioLogueado()) {
         <button class="pixel-btn-candy" routerLink="/perfil">{{ nombreUsuario() }} 👤</button>
         <button class="pixel-btn-logout" (click)="cerrarSesion()">CERRAR SESIÓN 🚪</button>
