@@ -56,8 +56,11 @@ export class InicioComponent implements OnInit {
 
   // Top 3 películas
   topPeliculas = computed(() => {
-    return this.peliculas().slice(0, 3);
-  });
+    return [...this.peliculas()] //hago una copia del array antes de ordenar
+      .sort((a, b) => (b.ventas ?? 0) - (a.ventas ?? 0)) //comparo los elementos - el ?? es por si las dudas, por si alguna esta en null
+      //si la película B vendio más que la A, el resultado es +, entonces B se pone antes que A
+      .slice(0, 3);
+  }); //el sort reordena la lista que le mando, la pisa, entoes hacete una fotocopia de la lista, y ordená la fotocopia, no el original
 
   seleccionarGenero(genero: string) {
     this.generoSeleccionado.set(genero);
