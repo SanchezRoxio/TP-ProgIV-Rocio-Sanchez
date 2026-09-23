@@ -1,0 +1,134 @@
+.candy-container {
+  background-color: #0b0b0e;
+  color: #fff;
+  min-height: 100vh;
+  padding: 20px;
+  font-family: 'Press Start 2P', monospace;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pixel-btn-volver {
+  background: transparent;
+  border: 2px solid #00f0ff;
+  color: #00f0ff;
+  font-family: 'Press Start 2P', monospace;
+  padding: 8px 12px;
+  cursor: pointer;
+  align-self: flex-start;
+  margin-bottom: 10px;
+}
+
+.candy-title {
+  color: #ffe600;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.candy-grid {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 900px;
+}
+
+.pixel-card-candy {
+  background: #15151c;
+  border: 3px solid #ff0055;
+  padding: 15px;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 4px 4px 0px #ff0055;
+}
+
+.prod-name {
+  font-size: 15px;
+  color: #00ffcc;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.prod-precio {
+  font-size: 15px;
+  color: #fff;
+}
+
+.contador-box {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.pixel-btn-count {
+  background: #000;
+  border: 2px solid #00ff66;
+  color: #00ff66;
+  font-family: 'Press Start 2P', monospace;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+}
+
+.pixel-btn-count:hover {
+  background: #00ff66;
+  color: #000;
+}
+
+.cantidad-num {
+  color: #ffe600;
+}
+
+.resumen-candy {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.resumen-candy p {
+  color: #ffe600;
+}
+
+.pixel-btn-pagar {
+  background: #00ff66;
+  border: 2px solid #fff;
+  color: #000;
+  font-family: 'Press Start 2P', monospace;
+  padding: 10px 20px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0px #ff0055;
+}
+
+.prod-img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  border: 2px solid #fff;
+  image-rendering: pixelated;
+}
+
+.botones-accion {
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.pixel-btn-saltar {
+  background: #cf6464;
+  border: 2px solid #f8f8f8;
+  color: #000;
+  font-family: 'Press Start 2P', monospace;
+  padding: 10px 15px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0px #ff0055;
+}
+
+.pixel-btn-saltar:hover, .pixel-btn-pagar:hover{
+  border-color: #fff;
+  color: #fff;
+}

@@ -1,0 +1,35 @@
+<div class="sala-container">
+  <button class="pixel-btn-volver" (click)="volver()">← VOLVER</button>
+
+  <h2 class="sala-title">SELECCIÓN DE BUTACAS</h2>
+  
+  <div class="pantalla-cine">PANTALLA</div>
+
+  <div class="grilla-asientos">
+    @for (fila of filas; track fila) {
+      <div class="fila-row">
+        <span class="label-fila">{{ fila }}</span>
+        
+        <div class="bloque-fila-completa">
+          @for (butaca of obtenerButacasFila(fila); track butaca.id) {
+            @if (butaca.esPasillo) {
+              <div class="espacio-pasillo"></div>
+            } @else {
+              <button 
+                class="pixel-asiento {{ butaca.estado }} {{ butaca.tipo }}"
+                (click)="seleccionarButaca(butaca)">
+                {{ butaca.numero }}
+              </button>
+            }
+          }
+        </div>
+        <span class="label-fila">{{ fila }}</span>
+      </div>
+    }
+  </div>
+
+  <div class="resumen-compra" *ngIf="seleccionadas().length > 0">
+    <p>Asientos seleccionados: {{ seleccionadas().join(', ') }}</p>
+    <button class="pixel-btn-comprar" (click)="confirmarCompra()">CONFIRMAR COMPRA</button>
+  </div>
+</div>

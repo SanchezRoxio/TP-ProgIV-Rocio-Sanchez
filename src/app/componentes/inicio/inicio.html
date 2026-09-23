@@ -1,0 +1,91 @@
+<div class="pixel-inicio-container">
+
+  <header class="inicio-header">
+    <div class="header-top-bar">
+      <h1 class="main-title">ROXI'S MOVIES</h1>
+       <!-- directiva estructural personalizada -->
+      <button class="pixel-btn-candy" *appAdmin="'admin'" routerLink="/admin">ADMIN ⚙️</button>
+  
+      <button class="pixel-btn-candy" routerLink="/candy">CANDY BAR 🍿</button>  
+      @if (usuarioLogueado()) {
+        <button class="pixel-btn-candy" routerLink="/perfil">{{ nombreUsuario() }} 👤</button>
+        <button class="pixel-btn-logout" (click)="cerrarSesion()">CERRAR SESIÓN 🚪</button>
+      } @else {
+        <button class="pixel-btn-candy" routerLink="/login">INICIAR SESIÓN 🔑</button>
+      }
+    </div>
+  </header>
+  
+  <!-- Top de las pelis-->
+  <section class="top-section">
+    <h2 class="section-subtitle">⭐ TOP 3 ⭐</h2>
+    <div class="top-grid">
+      @for (peli of topPeliculas(); track peli.id) {
+        <div class="pixel-card top-card">
+          <span class="badge-top">TOP</span>
+          @if (peli.imagen) {
+            <img [src]="peli.imagen" alt="Póster" class="peli-poster" />
+          }
+          <h3 class="peli-title">{{ peli.titulo }}</h3>
+          <p class="peli-info">{{ peli.clasificacion }} | {{ peli.duracion }} mins</p>
+          <div class="generos-container">
+            @for (gen of peli.generos; track gen) {
+              <span class="tag-genero">{{ gen }}</span>
+            }
+          </div>
+          <button class="pixel-btn" (click)="verDetalle(peli.id)">VER DETALLE / COMPRAR</button>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- buscador -->
+  <section class="filter-section">
+    <div class="search-box">
+      <input 
+        type="text" 
+        [ngModel]="filtroBusqueda()" 
+        (ngModelChange)="filtroBusqueda.set($event)"
+        placeholder="Buscar película..." 
+        class="pixel-input"
+      />
+    </div>
+    
+    <div class="genres-filter">
+      <button class="filter-btn" (click)="seleccionarGenero('TODOS')">TODOS</button>
+      <button class="filter-btn" (click)="seleccionarGenero('Acción')">ACCIÓN</button>
+      <button class="filter-btn" (click)="seleccionarGenero('Ciencia Ficción')">CIENCIA FICCIÓN</button>
+      <button class="filter-btn" (click)="seleccionarGenero('Aventura')">AVENTURA</button>
+       <button class="filter-btn" (click)="seleccionarGenero('Comedia')">COMEDIA</button>
+      <button class="filter-btn" (click)="seleccionarGenero('Drama')">DRAMA</button>
+      <button class="filter-btn" (click)="seleccionarGenero('Terror')">TERROR</button>
+      <button class="filter-btn" (click)="seleccionarGenero('Misterio')">MISTERIO</button>
+    </div>
+  </section>
+
+  <!-- Listado (Adaptado con Pipe) -->
+  <section class="catalogo-section">
+    <h2 class="section-subtitle">CARTELERA GENERAL</h2>
+    <div class="catalogo-grid">
+      <!-- Filtro las pelis usando el custom pipe por texto y genero -->
+      @for (peli of peliculas() | filtroPelis: filtroBusqueda() : generoSeleccionado(); track peli.id) {
+        <div class="pixel-card">
+          @if (peli.imagen) {
+            <img [src]="peli.imagen" alt="Póster" class="peli-poster" />
+          }
+          <h3 class="peli-title">{{ peli.titulo }}</h3>
+          <p class="peli-sinopsis">{{ peli.sinopsis }}</p>
+          <p class="peli-info">{{ peli.clasificacion }} | {{ peli.duracion }} mins</p>
+          <div class="generos-container">
+            @for (gen of peli.generos; track gen) {
+              <span class="tag-genero">{{ gen }}</span>
+            }
+          </div>
+          <button class="pixel-btn" (click)="verDetalle(peli.id)">VER DETALLE / COMPRAR</button>
+        </div>
+      } @empty {
+        <p class="no-results">No se encontraron películas con esos criterios.</p>
+      }
+    </div>
+  </section>
+</div>

@@ -1,0 +1,71 @@
+<div class="pago-container">
+  <button class="pixel-btn-volver" (click)="volver()">← VOLVER </button>
+
+  <h2 class="pago-title">💳 FINALIZAR COMPRA 💳</h2>
+    @if (mensajeExito()) {
+        <div class="alert-success">{{ mensajeExito() }}</div>
+      }
+      @if (mensajeError()) {
+        <div class="alert-error">{{ mensajeError() }}</div>
+      }
+  <div class="checkout-grid">
+    <div class="resumen-seccion">
+      <h3 class="section-subtitle">RESUMEN DEL PEDIDO</h3>
+      
+      <div class="item-detalle">
+        <span>Entradas ({{ etiquetasButacas() }}):</span>
+        <span>$ {{ subtotalEntradas }}</span>
+      </div>
+
+      @for (item of candySeleccionado; track item.id) {
+        <div class="item-detalle">
+          <span>{{ item.nombre }} (x{{ item.cantidad }})</span>
+          <span>$ {{ item.precio * item.cantidad }}</span>
+        </div>
+      }
+
+      <div class="item-detalle" *ngIf="descuentoAplicado > 0">
+        <span>Descuento Aplicado:</span>
+        <span class="descuento">- $ {{ descuentoAplicado }}</span>
+      </div>
+
+      <div class="item-detalle" *ngIf="usarCredito">
+        <span>Crédito a favor aplicado:</span>
+        <span class="descuento">- $ {{ creditoDisponible }}</span>
+      </div>
+
+      <div class="total-box">
+        <span>TOTAL A PAGAR:</span>
+        <span class="total-monto">$ {{ calcularTotal() }}</span>
+      </div>
+    </div>
+
+    <div class="opciones-pago">
+      <h3 class="section-subtitle">BENEFICIOS Y PAGO</h3>
+
+      <div class="cupon-box">
+        <label>¿Tenés un código de cupón?</label>
+        <div class="input-group">
+          <input type="text" [(ngModel)]="codigoCupon" placeholder="Ej: BIENVENIDA20" class="pixel-input" />
+          <button class="pixel-btn-aplicar" (click)="aplicarCupon()">APLICAR</button>
+        </div>
+      </div>
+
+      <div class="credito-box" *ngIf="creditoDisponible > 0">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="usarCredito" />
+          Usar crédito disponible ($ {{ creditoDisponible }}) por cancelaciones
+        </label>
+      </div>
+
+      <div class="metodo-pago">
+        <label>Método de Pago:</label>
+        <select class="pixel-input">
+          <option>Tarjeta de Crédito / Débito (MercadoPago / Web)</option>
+          <option>Crédito UVA Banco Nación</option>
+        </select>
+      </div>
+      <button class="pixel-btn-confirmar" (click)="finalizarCompra()" [disabled]="procesando">{{ procesando ? 'PROCESANDO...' : 'CONFIRMAR' }}</button>
+    </div>
+  </div>
+</div>

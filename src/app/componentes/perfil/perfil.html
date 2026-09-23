@@ -1,0 +1,35 @@
+<div class="perfil-container">
+  <button class="pixel-btn-volver" (click)="volverInicio()">← VOLVER A INICIO</button>
+  
+  <div class="perfil-card">
+    <h1 class="perfil-title">👾 PERFIL DE USUARIO 👾</h1>
+
+    <div class="user-info">
+      <p><strong>NOMBRE:</strong> {{ nombre() }} {{ apellido() }}</p>
+      <p><strong>EMAIL:</strong> {{ email() }}</p>
+       <!--  <p><strong>ROL:</strong> {{ rol() }}</p> -->
+      <p><strong>FECHA DE NACIMIENTO:</strong> {{ fechaNacimiento() }}</p>
+      <p><strong>TIPO DE SANGRE:</strong> {{ tipoSangre() }}</p>
+      <p><strong>COLOR DE OJOS:</strong> {{ colorOjos() }}</p>
+      
+      <div class="fidelizacion-box">
+        <span class="puntos-badge">⭐ PUNTOS ROXI'S CLUB: {{ puntos() }} PTS</span>
+        <p class="puntos-desc">¡Canjeá tus puntos por un combo de pochoclos gratis en el Candy Bar!</p>
+      </div>
+    </div>
+
+    <div class="historial-section">
+      <h3 class="section-title">🍿 MIS ENTRADAS Y FUNCIONES</h3>
+
+      @for (item of historialEntradas(); track item.pelicula) {
+        <div class="entrada-card">
+          <h4 style="color: #00ffcc;">{{ item.pelicula }}</h4>
+          <p style="color: #ccc; margin: 4px 0;">Fecha: {{ item.fecha }} | Sala: {{ item.sala }}</p>
+          <p style="color: #ffe600; font-size: 13px;">Asientos: {{ item.asientos.join(', ') }}</p>
+        </div>
+      } @empty {
+        <p style="color: #888; font-size: 15px;">No tenés entradas registradas todavía.</p>
+      }
+    </div>
+  </div>
+</div>

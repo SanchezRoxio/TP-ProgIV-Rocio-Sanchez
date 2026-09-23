@@ -1,0 +1,34 @@
+<div class="pixel-container">
+  <div class="pixel-card">
+    <h2 class="pixel-title">INICIAR SESION</h2>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmitLogin()" class="pixel-form">
+      <div class="pixel-group">
+        <label>EMAIL:</label>
+        <input type="email" formControlName="email" placeholder="correo@ejemplo.com" autocomplete="off" />
+        @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+          <span class="input-error">Ingresa un correo válido.</span>
+        }
+      </div>
+
+      <div class="pixel-group">
+        <label>CONTRASEÑA:</label>
+        <input type="password" formControlName="password" placeholder="********" autocomplete="current-password" />
+        @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+          <span class="input-error">Contraseña requerida.</span>
+        }
+      </div>
+
+      @if (errorMessage()) {
+        <div class="credenciales-error">{{ errorMessage() }}</div>
+      }
+
+      <button type="submit" class="pixel-btn">INGRESAR</button>
+      
+      <!-- Redirige a la nueva ruta de registro -->
+      <button type="button" class="pixel-btn-switch" routerLink="/registro">
+        ¿No tenés cuenta? Registrate
+      </button>
+    </form>
+  </div>
+</div>

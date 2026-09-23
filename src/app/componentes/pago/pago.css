@@ -1,0 +1,143 @@
+.pago-container {
+  background-color: #0b0b0e;
+  color: #fff;
+  min-height: 100vh;
+  padding: 20px;
+  font-family: 'Press Start 2P', monospace;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pixel-btn-volver {
+  background: transparent;
+  border: 2px solid #00f0ff;
+  color: #00f0ff;
+  font-family: 'Press Start 2P', monospace;
+  padding: 8px 12px;
+  cursor: pointer;
+  align-self: flex-start;
+  margin-bottom: 10px;
+}
+
+.pago-title {
+  color: #ffe600;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.checkout-grid {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 900px;
+  width: 100%;
+}
+
+.resumen-seccion, .opciones-pago {
+  background: #15151c;
+  border: 3px solid #ff0055;
+  padding: 20px;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  box-shadow: 4px 4px 0px #ff0055;
+}
+
+.section-subtitle {
+  color: #00ffcc;
+  border-bottom: 2px dashed #444;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.item-detalle {
+  display: flex;
+  justify-content: space-between;
+  color: #ccc;
+}
+
+.descuento {
+  color: #00ff66;
+}
+
+.total-box {
+  display: flex;
+  justify-content: space-between;
+  color: #ffe600;
+  border-top: 2px solid #fff;
+  padding-top: 12px;
+  margin-top: 10px;
+}
+
+.cupon-box, .credito-box, .metodo-pago {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.pixel-input {
+  background: #000;
+  border: 2px solid #fff;
+  color: #fff;
+  font-family: 'Press Start 2P', monospace;
+  padding: 8px;
+  flex: 1;
+}
+
+.pixel-btn-aplicar {
+  background: #00f0ff;
+  border: 2px solid #fff;
+  color: #000;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 13px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.pixel-btn-confirmar {
+  background: #00ff66;
+  border: 2px solid #fff;
+  color: #000;
+  font-family: 'Press Start 2P', monospace;
+  padding: 12px;
+  cursor: pointer;
+  margin-top: 15px;
+  box-shadow: 4px 4px 0px #ff0055;
+  text-align: center;
+}
+/**EStilo de las butacas ya compradas :) **/
+.alert-success { 
+  background-color: #00ffcc;
+  color: #000;
+  padding: 10px;
+  font-size: 15px;
+  text-align: center;
+  margin-bottom: 20px;
+  border: 2px solid #fff;
+}
+
+.alert-error {
+  background-color: #ff0055;
+  color: #fff;
+  padding: 10px;
+  font-size: 15px;
+  text-align: center;
+  margin-bottom: 20px;
+  border: 2px solid #fff;
+}

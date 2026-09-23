@@ -1,0 +1,144 @@
+.detalle-container {
+  background-color: #0b0b0e;
+  color: #fff;
+  min-height: 100vh;
+  padding: 20px;
+  font-family: 'Press Start 2P', monospace;
+}
+
+.pixel-btn-volver {
+  background: transparent;
+  border: 2px solid #00f0ff;
+  color: #00f0ff;
+  font-family: 'Press Start 2P', monospace;
+  padding: 8px 12px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.pixel-btn-volver:hover {
+  background: #00f0ff;
+  color: #000;
+}
+
+.detalle-content {
+  display: flex;
+  gap: 30px;
+  max-width: 900px;
+  margin: 0 auto;
+  background: #15151c;
+  border: 3px solid #ff0055;
+  padding: 25px;
+  box-shadow: 6px 6px 0px #ff0055;
+}
+
+.pixel-poster {
+  width: 220px;
+  height: 320px;
+  object-fit: cover;
+  border: 2px solid #fff;
+}
+
+.peli-title {
+  font-size: 16px;
+  color: #00f0ff;
+  margin-bottom: 15px;
+}
+
+.tags-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.pixel-tag {
+  font-size: 10px;
+  background: #2a2a38;
+  border: 1px solid #fff;
+  padding: 4px 4px;
+}
+
+.sinopsis {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #ccc;
+  margin-bottom: 25px;
+}
+
+.funciones-section h3 {
+  font-size: 13px;
+  color: #ffe600;
+  margin-bottom: 12px;
+}
+
+.horarios-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pixel-btn-horario {
+  background: #000;
+  border: 2px solid #00ff66;
+  color: #00ff66;
+  font-family: 'Press Start 2P', monospace;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.pixel-btn-horario:hover {
+  background: #00ff66;
+  color: #000;
+}
+
+.pixel-btn-horario .hora {
+  font-size: 12px;
+}
+
+.pixel-btn-horario .sala {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.pixel-input {
+  background-color: #000;
+  border: 2px solid #00ffcc;
+  color: #00ffcc;
+  font-family: 'Press Start 2P', monospace;
+  outline: none;
+}
+
+.pixel-input option {
+  background-color: #000;
+  color: #fff;
+}
+
+.pixel-btn-enviar {
+  background: #00ff66;
+  border: 2px solid #fff;
+  color: #000;
+  font-family: 'Press Start 2P', monospace;
+  padding: 8px 12px;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px #00ffcc;
+}
+
+.pixel-btn-enviar:hover {
+  background: #00ffcc;
+  box-shadow: 2px 2px 0px #fff;
+}
+
+#reestriccion{
+  background: #222; 
+  border: 2px solid #ff0055; 
+  color: #ff0055; 
+  padding: 12px; 
+  margin-bottom: 15px; 
+  font-size: 15px; 
+  text-align: center;
+}

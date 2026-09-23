@@ -1,0 +1,165 @@
+<div class="pixel-admin-container">
+  <header class="admin-header">
+    <h1 class="main-title">Admin console 🛠️</h1>
+    <button class="pixel-btn-back" routerLink="/inicio">VOLVER AL INICIO</button>
+  </header>
+
+  <div class="admin-nav">
+    <button class="pixel-tab-btn" (click)="cambiarSeccion('peliculas')">PELÍCULAS & FUNCIONES</button>
+    <button class="pixel-tab-btn" (click)="cambiarSeccion('salas')">SALAS</button>
+    <button class="pixel-tab-btn" (click)="cambiarSeccion('candy')">CANDY BAR</button>
+    <button class="pixel-tab-btn" (click)="cambiarSeccion('reportes')">REPORTES & LOGS</button>
+  </div>
+
+  @if (mensajeExito()) {
+    <div class="alert-success">{{ mensajeExito() }}</div>
+  }
+  @if (mensajeError()) {
+    <div class="alert-error">{{ mensajeError() }}</div>
+  }
+
+  <!-- SECCIÓN PELÍCULAS & FUNCIONES -->
+  @if (seccionActiva() === 'peliculas') {
+    <section class="admin-section">
+      <h2>GESTIÓN DE CARTELERA Y FUNCIONES</h2>
+      <form [formGroup]="peliculaForm" (ngSubmit)="guardarPelicula()" class="pixel-form">
+        <div class="pixel-group">
+          <label>TÍTULO:</label>
+          <input type="text" formControlName="titulo" placeholder="Ejemplo 1" class="pixel-input" />
+        </div>
+        <div class="pixel-group">
+            <label>URL DE LA IMAGEN / PÓSTER:</label>
+            <input type="text" formControlName="imagen" placeholder="https://ejemplo.com/ejemplo.jpg" class="pixel-input" />
+        </div>
+        <div class="pixel-group">
+          <label>SINOPSIS:</label>
+          <textarea formControlName="sinopsis" class="pixel-input"></textarea>
+        </div>
+        <div class="pixel-group">
+          <label>DURACIÓN (mins):</label>
+          <input type="number" formControlName="duracion" placeholder="120" class="pixel-input" />
+        </div>
+        <div class="pixel-group">
+          <label>CLASIFICACIÓN (ATP, +13, +18):</label>
+          <input type="text" formControlName="clasificacion" placeholder="+13" class="pixel-input" />
+        </div>
+        <div class="pixel-group">
+          <label>GÉNEROS (separados por coma):</label>
+          <input type="text" formControlName="generos" placeholder="Acción, Aventura" class="pixel-input" />
+        </div>
+
+        <div formArrayName="funciones">
+          @for (funcion of funciones.controls; track funcion; let i = $index) {
+            <div [formGroupName]="i" class="pixel-group">
+              <label>DÍA:</label>
+              <select formControlName="dia" class="pixel-input">
+                <option value="Lunes">Lunes</option>
+                <option value="Martes">Martes</option>
+                <option value="Miércoles">Miércoles</option>
+                <option value="Jueves">Jueves</option>
+                <option value="Viernes">Viernes</option>
+                <option value="Sábado">Sábado</option>
+                <option value="Domingo">Domingo</option>
+              </select>
+
+              <label>HORARIO:</label>
+              <input type="text" formControlName="horario" placeholder="18:00" class="pixel-input" />
+
+              <label>FORMATO:</label>
+              <select formControlName="formato" class="pixel-input">
+                <option value="2D">2D</option>
+                <option value="3D">3D</option>
+                <option value="4D">4D</option>
+              </select>
+
+              <label>IDIOMA:</label>
+              <select formControlName="idioma" class="pixel-input">
+                <option value="castellano">Castellano</option>
+                <option value="subtitulada">Subtitulada</option>
+              </select>
+
+              @if (funciones.length > 1) {
+                <button type="button" class="pixel-btn-back" (click)="eliminarFuncion(i)">✕ QUITAR</button>
+              }
+            </div>
+          }
+        </div>
+
+        <button type="button" class="pixel-btn-back" (click)="agregarFuncion()">+ AGREGAR OTRA FUNCIÓN</button>
+
+        <button type="submit" class="pixel-btn">GUARDAR PELÍCULA Y FUNCIONES</button>
+      </form>
+    </section>
+  }
+
+  <!-- SECCIÓN SALAS -->
+  @if (seccionActiva() === 'salas') {
+    <section class="admin-section">
+      <h2>GESTIÓN DE SALAS</h2>
+      <p class="pixel-info">Al crear una sala, las butacas se generan automáticamente con la distribución estándar del cine.</p>
+      <form [formGroup]="salaForm" (ngSubmit)="guardarSala()" class="pixel-form">
+        <div class="pixel-group">
+          <label>NOMBRE DE LA SALA:</label>
+          <input type="text" formControlName="nombre" placeholder="Sala" class="pixel-input" />
+        </div>
+        <button type="submit" class="pixel-btn">CREAR SALA</button>
+      </form>
+    </section>
+  }
+
+  <!-- SECCIÓN CANDY -->
+  @if (seccionActiva() === 'candy') {
+    <section class="admin-section">
+      <h2>GESTIÓN DE PRODUCTOS</h2>
+      <form [formGroup]="candyForm" (ngSubmit)="guardarCandy()" class="pixel-form">
+        <div class="pixel-group">
+          <label>NOMBRE DEL PRODUCTO:</label>
+          <input type="text" formControlName="nombre" class="pixel-input" />
+        </div>
+        <div class="pixel-group">
+          <label>CATEGORÍA:</label>
+          <input type="text" formControlName="categoria" placeholder="Pochoclos / Bebidas" class="pixel-input" />
+        </div>
+        <div class="pixel-group">
+          <label>URL DE LA IMAGEN:</label>
+          <input type="text" formControlName="imagen" placeholder="https://ejemplo.com/producto.jpg" class="pixel-input" />
+        </div>
+        <div class="pixel-group">
+          <label>PRECIO ($):</label>
+          <input type="number" formControlName="precio" class="pixel-input" />
+        </div>
+
+        <button type="submit" class="pixel-btn">{{ editandoCandyId() ? 'GUARDAR CAMBIOS' : 'AGREGAR PRODUCTO' }}</button>
+        @if (editandoCandyId()) {
+          <button type="button" class="pixel-btn-back" (click)="cancelarEdicionCandy()">CANCELAR EDICIÓN</button>
+        }
+      </form>
+
+      <h2 style="margin-top: 40px;">PRODUCTOS CARGADOS</h2>
+      @for (producto of candyList(); track producto.id) {
+        <div class="pixel-group" style="border: 2px solid #333; padding: 12px;">
+          <span>{{ producto.nombre }} — {{ producto.categoria }} — ${{ producto.precio }}</span>
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="pixel-btn-back" (click)="editarCandy(producto)">EDITAR</button>
+            <button type="button" class="pixel-btn-back" (click)="borrarCandy(producto.id)">BORRAR</button>
+          </div>
+        </div>
+      } @empty {
+        <p class="pixel-info">No hay productos cargados todavía.</p>
+      }
+    </section>
+  }
+
+  <!-- SECCIÓN REPORTES -->
+  @if (seccionActiva() === 'reportes') {
+    <section class="admin-section">
+      <h2>FACTURACIÓN Y VENTAS</h2>
+      <p class="pixel-info">Aquí podrás visualizar estadísticas de recaudación y exportar los reportes solicitados por la administración.</p>
+
+      <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; justify-content: center;">
+        <button class="pixel-btn" (click)="exportarPDF()">EXPORTAR A PDF 📄</button>
+        <button class="pixel-btn" (click)="exportarExcel()">EXPORTAR A EXCEL 📊</button>
+      </div>
+    </section>
+  }
+</div>

@@ -1,0 +1,30 @@
+<div class="candy-container">
+  <button class="pixel-btn-volver" (click)="volver()">← VOLVER</button>
+
+  <h2 class="candy-title">🍿 CANDY BAR 🍿</h2>
+
+  <div class="candy-grid">
+    @for (prod of productos(); track prod.id) {
+      <div class="pixel-card-candy">
+        <img [src]="prod.imagen" [alt]="prod.nombre" class="prod-img" />
+        <h3 class="prod-name">{{ prod.nombre }}</h3>
+        <p class="prod-precio">$ {{ prod.precio }}</p>
+        
+        <div class="contador-box">
+          <button class="pixel-btn-count" (click)="cambiarCantidad(prod.id, -1)">-</button>
+          <span class="cantidad-num">{{ prod.cantidad }}</span>
+          <button class="pixel-btn-count" (click)="cambiarCantidad(prod.id, 1)">+</button>
+        </div>
+      </div>
+    }
+  </div> 
+
+ <div class="resumen-candy">
+    <p>Total Candy: $ {{ calcularTotal() }}</p>
+    
+    <div class="botones-accion">
+      <button class="pixel-btn-saltar" (click)="saltarCandy()">SALTAR</button>
+      <button class="pixel-btn-pagar" (click)="continuarPago()">PAGAR</button>
+    </div>
+  </div>
+</div>

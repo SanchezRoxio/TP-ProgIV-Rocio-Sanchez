@@ -1,0 +1,67 @@
+<div class="detalle-container" *ngIf="pelicula() as p">
+  <button class="pixel-btn-volver" (click)="volver()">← VOLVER A CARTELERA</button>
+
+  <div class="detalle-content">
+    <div class="poster-box">
+      <img [src]="p.imagen" [alt]="p.titulo" class="pixel-poster" />
+    </div>
+
+    <div class="info-box">
+      <h1 class="peli-title">{{ p.titulo }}</h1>
+      
+      <div class="tags-row">
+        <span class="pixel-tag">{{ p.clasificacion }}</span>
+        <span class="pixel-tag">{{ p.duracion }} mins</span>
+        <span class="pixel-tag" *ngFor="let g of p.generos">{{ g }}</span>
+      </div>
+
+      <p class="sinopsis">{{ p.sinopsis }}</p>
+
+      <!-- restriccion de edad -->
+      @if (avisoRestriccion()) {
+        <div class="reestriccion">
+          {{ avisoRestriccion() }}
+        </div>
+      }
+
+      <div class="funciones-section">
+        <h3>SELECCIONAR FUNCIÓN / HORARIO</h3>
+        <div class="horarios-grid">
+          <button *ngFor="let f of p.funciones" class="pixel-btn-horario" (click)="seleccionarFuncion(f.id)">
+            <span class="hora">{{ f.horario }}</span>
+            <span class="sala">{{ f.sala }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="resenas-section" style="margin-top: 25px; border-top: 2px dashed #444; padding-top: 15px;">
+        <h3 style="color: #ffe600; margin-bottom: 12px;">⭐ RESEÑAS ({{ calcularPromedio() }} / 5) ⭐</h3>
+
+        <div class="formulario-resena" style="display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;">
+          <select [(ngModel)]="nuevaEstrellas" class="pixel-input" style="text-align: center;">
+            <option [value]="5">5⭐</option>
+            <option [value]="4">4⭐</option>
+            <option [value]="3">3⭐</option>
+            <option [value]="2">2⭐</option>
+            <option [value]="1">1⭐</option>
+          </select>         
+          <input type="text" [(ngModel)]="nuevoComentario" placeholder="Escribe un comentario..." class="pixel-input" style="flex: 1;padding: 6px;" />
+          <button class="pixel-btn-enviar" (click)="agregarResena()">OPINAR</button>
+        </div>
+
+        <div class="lista-resenas" style="display: flex; flex-direction: column; gap: 8px;">
+          @for (res of resenas(); track res.comentario) {
+            <div class="resena-card" style="background: #0b0b0e; border: 1px solid #444; padding: 8px;">
+              <span style="color: #00ffcc;">{{ res.usuario }} - {{ res.estrellas }} ⭐</span>
+              <p style="color: #ccc; margin: 4px 0;">"{{ res.comentario }}"</p>
+              <span style="color: #888; font-size: 14px;">{{ res.fecha }}</span>
+            </div>
+          } @empty {
+            <p style="color: #888; font-size: 9px;">No hay reseñas todavía.</p>
+          }
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

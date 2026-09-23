@@ -1,0 +1,84 @@
+<div class="pixel-container">
+  <div class="pixel-card">
+    <h2 class="pixel-title">REGISTRO</h2>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmitRegister()" class="pixel-form">
+      <div class="pixel-group">
+        <label>NOMBRE:</label>
+        <input type="text" formControlName="nombre" placeholder="Tu nombre" autocomplete="off" />
+        @if (registerForm.get('nombre')?.invalid && registerForm.get('nombre')?.touched) {
+          <span class="input-error">El nombre es requerido.</span>
+        }
+      </div>
+
+      <div class="pixel-group">
+        <label>APELLIDO:</label>
+        <input type="text" formControlName="apellido" placeholder="Tu apellido" autocomplete="off" />
+        @if (registerForm.get('apellido')?.invalid && registerForm.get('apellido')?.touched) {
+          <span class="input-error">El apellido es requerido.</span>
+        }
+      </div>
+
+      <div class="pixel-group">
+        <label>EMAIL:</label>
+        <input type="email" formControlName="email" placeholder="correo@ejemplo.com" autocomplete="off" />
+        @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+          <span class="input-error">Ingresa un correo válido.</span>
+        }
+      </div>
+
+      <div class="pixel-group">
+        <label>CONTRASEÑA:</label>
+        <input type="password" formControlName="password" placeholder="********" autocomplete="new-password" />
+        @if (registerForm.get('password')?.hasError('required') && registerForm.get('password')?.touched) {
+          <span class="input-error">La contraseña es requerida.</span>
+        }
+        @if (registerForm.get('password')?.hasError('minlength') && registerForm.get('password')?.touched) {
+          <span class="input-error">Mínimo 6 caracteres.</span>
+        }
+      </div>
+      
+      <div class="pixel-group">
+        <label>CONFIRMAR CONTRASEÑA:</label>
+        <input type="password" formControlName="confirmPassword" placeholder="********" autocomplete="new-password" />
+        @if (registerForm.get('confirmPassword')?.touched && registerForm.hasError('noCoinciden')) {
+          <span class="input-error">Las contraseñas no coinciden.</span>
+        }
+      </div>
+
+      <div class="pixel-group">
+        <label>FECHA NACIMIENTO:</label>
+        <input type="date" formControlName="fecha_nacimiento" />
+      </div>
+
+      <div class="pixel-group">
+        <label>TIPO DE SANGRE:</label>
+        <input type="text" formControlName="tipo_sangre" placeholder="Ej: O+" autocomplete="off" />
+      </div>
+
+      <div class="pixel-group">
+        <label>COLOR DE OJOS:</label>
+        <input type="text" formControlName="color_ojos" placeholder="Ej: Marrones" autocomplete="off" />
+      </div>
+
+      <div class="pixel-group">
+        <label>DÍAS DE VACACIONES:</label>
+        <input type="number" formControlName="dias_vacaciones" placeholder="Ej: 14" />
+      </div>
+
+      @if (errorMessage()) {
+        <div class="credenciales-error">{{ errorMessage() }}</div>
+      }
+
+      @if (successMessage()) {
+        <div class="credenciales-exito">{{ successMessage() }}</div>
+      }
+
+      <button type="submit" class="pixel-btn-registro">REGISTRARSE</button>
+      
+      <button type="button" class="pixel-btn-switch" routerLink="/login">
+        ¿Ya tenés cuenta? Ingresar
+      </button>
+    </form>
+  </div>
+</div>
