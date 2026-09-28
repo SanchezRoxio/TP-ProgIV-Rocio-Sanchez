@@ -84,7 +84,6 @@
 }
 
 .resumen-candy {
-  margin-top: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -131,4 +130,26 @@
 .pixel-btn-saltar:hover, .pixel-btn-pagar:hover{
   border-color: #fff;
   color: #fff;
+}
+
+.combos-title {
+  color: #ffe600;
+  text-align: center;
+}
+
+.combos-grid {
+  margin-bottom: 10px;
+}
+
+.pixel-card-combo {
+  border-color: #ffe600;
+  box-shadow: 4px 4px 0px #ffe600;
+  background: #1c1808;
+}
+
+.combo-incluye {
+  font-size: 11px;
+  color: #ccc;
+  text-align: center;
+  line-height: 1.5;
 }

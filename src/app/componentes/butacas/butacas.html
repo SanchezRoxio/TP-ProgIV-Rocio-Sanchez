@@ -5,6 +5,14 @@
   
   <div class="pantalla-cine">PANTALLA</div>
 
+  <div class="leyenda-butacas">
+    <span class="leyenda-item"><span class="leyenda-color general"></span> General</span>
+    <span class="leyenda-item"><span class="leyenda-color discapacidad"></span> Accesible</span>
+    <span class="leyenda-item"><span class="leyenda-color vip"></span> VIP</span>
+    <span class="leyenda-item"><span class="leyenda-color seleccionada"></span> Seleccionada</span>
+    <span class="leyenda-item"><span class="leyenda-color ocupada"></span> Ocupada</span>
+  </div>
+
   <div class="grilla-asientos">
     @for (fila of filas; track fila) {
       <div class="fila-row">
@@ -30,6 +38,9 @@
 
   <div class="resumen-compra" *ngIf="seleccionadas().length > 0">
     <p>Asientos seleccionados: {{ seleccionadas().join(', ') }}</p>
+    @if (haySeleccionVip()) {
+      <p class="aviso-vip">⭐ Elegiste al menos una butaca VIP, tiene un precio más alto que las generales.</p>
+    }
     <button class="pixel-btn-comprar" (click)="confirmarCompra()">CONFIRMAR COMPRA</button>
   </div>
 </div>

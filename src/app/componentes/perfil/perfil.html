@@ -19,17 +19,26 @@
     </div>
 
     <div class="historial-section">
-      <h3 class="section-title">🍿 MIS ENTRADAS Y FUNCIONES</h3>
+      <h3 class="section-title">🎬 MIS PELÍCULAS</h3>
 
-      @for (item of historialEntradas(); track item.pelicula) {
-        <div class="entrada-card">
-          <h4 style="color: #00ffcc;">{{ item.pelicula }}</h4>
-          <p style="color: #ccc; margin: 4px 0;">Fecha: {{ item.fecha }} | Sala: {{ item.sala }}</p>
-          <p style="color: #ffe600; font-size: 13px;">Asientos: {{ item.asientos.join(', ') }}</p>
-        </div>
-      } @empty {
-        <p style="color: #888; font-size: 15px;">No tenés entradas registradas todavía.</p>
-      }
+      <div class="mis-peliculas-grid">
+        @for (item of historialEntradas(); track item.peliculaId + item.fecha) {
+          <div class="mini-poster-card">
+            @if (item.imagen) {
+              <img [src]="item.imagen" [alt]="item.pelicula" class="mini-poster" />
+            }
+            <h4 class="mini-poster-title">{{ item.pelicula }}</h4>
+            <p class="mini-poster-fecha">{{ item.fecha }}</p>
+            @if (item.miCalificacion) {
+              <p class="mini-poster-estrellas">{{ '⭐'.repeat(item.miCalificacion) }}</p>
+            } @else {
+              <p class="mini-poster-sin-calificar">Todavía no la calificaste</p>
+            }
+          </div>
+        } @empty {
+          <p style="color: #888; font-size: 15px;">No tenés películas en tu historial todavía.</p>
+        }
+      </div>
     </div>
   </div>
 </div>

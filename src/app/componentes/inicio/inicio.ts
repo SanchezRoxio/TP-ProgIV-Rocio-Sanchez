@@ -26,7 +26,9 @@ export class InicioComponent implements OnInit {
 
   // Filtros
   filtroBusqueda = signal<string>('');
-  generoSeleccionado = signal<string>('TODOS');
+  generosSeleccionados = signal<string[]>([]); // vacío = "todos", sin filtro de género aplicado
+  misAlertas = signal<number[]>([]);
+
 
   constructor() {
   effect(() => {
@@ -34,8 +36,10 @@ export class InicioComponent implements OnInit {
     if (usuario) {
       this.usuarioLogueado.set(true);
       this.nombreUsuario.set(usuario.nombre || usuario.email.split('@')[0].toUpperCase());
+      this.authService.obtenerMisAlertas(usuario.id).then(ids => this.misAlertas.set(ids));
     } else {
       this.usuarioLogueado.set(false);
+      this.misAlertas.set([]);
     }
     });
   }
@@ -54,16 +58,55 @@ export class InicioComponent implements OnInit {
     }
   }
 
+  // Cuántos días faltan para el estreno (negativo si ya pasó)
+  private diasHastaEstreno(fechaEstreno: string): number {
+    const hoy = new Date();
+    const estreno = new Date(fechaEstreno);
+    return (estreno.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24);
+  }
+
+  // Más de 7 días para el estreno: solo alerta, no se puede comprar todavía
+  proximamente = computed(() => {
+    return this.peliculas().filter(p => p.fecha_estreno && this.diasHastaEstreno(p.fecha_estreno) > 7);
+  });
+
+  // Sin fecha de estreno, o a 7 días o menos (entró en preventa), o ya estrenada
+  peliculasCartelera = computed(() => {
+    return this.peliculas().filter(p => !p.fecha_estreno || this.diasHastaEstreno(p.fecha_estreno) <= 7);
+  });
+
   // Top 3 películas
   topPeliculas = computed(() => {
-    return [...this.peliculas()] //hago una copia del array antes de ordenar
+    return [...this.peliculasCartelera()] //hago una copia del array antes de ordenar
       .sort((a, b) => (b.ventas ?? 0) - (a.ventas ?? 0)) //comparo los elementos - el ?? es por si las dudas, por si alguna esta en null
       //si la película B vendio más que la A, el resultado es +, entonces B se pone antes que A
       .slice(0, 3);
   }); //el sort reordena la lista que le mando, la pisa, entoes hacete una fotocopia de la lista, y ordená la fotocopia, no el original
 
-  seleccionarGenero(genero: string) {
-    this.generoSeleccionado.set(genero);
+  toggleGenero(genero: string) {
+    // "TODOS" siempre limpia la selección entera, no se combina con el resto
+    if (genero === 'TODOS') {
+      this.generosSeleccionados.set([]);
+      return;
+    }
+
+    this.generosSeleccionados.update(actuales => {
+      // si ya estaba tildado, lo saco; si no estaba, lo agrego
+      if (actuales.includes(genero)) {
+        return actuales.filter(g => g !== genero);
+      }
+      return [...actuales, genero];
+    });
+  }
+
+  async activarAlerta(peliculaId: number) {
+  const usuario = this.authService.usuarioActual();
+  if (!usuario) {
+    this.router.navigate(['/login']);
+    return;
+  }
+  await this.authService.activarAlertaEstreno(usuario.id, peliculaId);
+  this.misAlertas.update(ids => [...ids, peliculaId]);
   }
 
   verDetalle(id: number) {

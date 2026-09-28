@@ -16,11 +16,23 @@
         <span>Entradas ({{ etiquetasButacas() }}):</span>
         <span>$ {{ subtotalEntradas }}</span>
       </div>
+      @if (butacasCubiertasPorCombo > 0) {
+        <p style="font-size: 11px; color: #ffe600; margin: -6px 0 6px 0;">
+          ({{ butacasCubiertasPorCombo }} de esas entradas ya están incluidas en el precio de tu combo)
+        </p>
+      }
 
       @for (item of candySeleccionado; track item.id) {
         <div class="item-detalle">
           <span>{{ item.nombre }} (x{{ item.cantidad }})</span>
           <span>$ {{ item.precio * item.cantidad }}</span>
+        </div>
+      }
+
+      @for (combo of combosSeleccionados; track combo.id) {
+        <div class="item-detalle">
+          <span>⭐ {{ combo.nombre }} (x{{ combo.cantidad }})</span>
+          <span>$ {{ combo.precio * combo.cantidad }}</span>
         </div>
       }
 

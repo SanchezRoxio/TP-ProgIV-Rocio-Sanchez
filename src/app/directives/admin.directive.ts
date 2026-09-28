@@ -25,8 +25,10 @@ export class AdminDirective implements OnInit, DoCheck {
   private verificarPermisos() {
     const usuario = this.authService.usuarioActual();
 
-    // debe estar logueado Y tener rol admin o gerente
-    const esAdmin = usuario && (usuario.rol === 'admin' || usuario.rol === 'gerente');
+    // debe estar logueado Y tener un rol de admin (misma regla que usa
+    // adminGuard, centralizada en authService.esRolAdmin() para que no
+    // se desalineen los dos lugares que deciden "quién es admin")
+    const esAdmin = usuario && this.authService.esRolAdmin(usuario.rol);
 
     if (esAdmin && !this.hasView) {
       this.viewContainer.createEmbeddedView(this.templateRef);

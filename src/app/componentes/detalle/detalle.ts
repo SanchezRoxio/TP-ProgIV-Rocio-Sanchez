@@ -84,6 +84,7 @@ export class DetalleComponent implements OnInit {
 
       const nueva = {
         pelicula_id: Number(this.peliculaId),
+        usuario_id: usuarioLogueado?.id || null,
         usuario: nombreUsuario,
         estrellas: Number(this.nuevaEstrellas),
         comentario: this.nuevoComentario.trim(),

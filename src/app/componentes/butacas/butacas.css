@@ -37,6 +37,54 @@
   box-shadow: 0px 4px 10px rgba(0, 240, 255, 0.2);
 }
 
+.leyenda-butacas {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 20px;
+  font-size: 10px;
+}
+
+.leyenda-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.leyenda-color {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  background: #000;
+  border: 2px solid #444;
+}
+
+.leyenda-color.discapacidad {
+  border-color: #00f0ff;
+}
+
+.leyenda-color.vip {
+  border-color: #ffe600;
+}
+
+.leyenda-color.seleccionada {
+  background: #00ff66;
+  border-color: #fff;
+}
+
+.leyenda-color.ocupada {
+  background: #1a1a1a;
+  border-color: #555;
+  opacity: 0.5;
+}
+
+.aviso-vip {
+  color: #ffe600 !important;
+  font-size: 13px;
+  text-align: center;
+}
+
 .grilla-asientos {
   display: flex;
   flex-direction: column;

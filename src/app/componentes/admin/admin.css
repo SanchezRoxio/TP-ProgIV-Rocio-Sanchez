@@ -77,8 +77,28 @@
   gap: 8px;
 }
 
+/* fila de un listado (pelicula/sala/candy cargado): titulo a la izquierda,
+   botones de editar/borrar a la derecha, en vez de uno abajo del otro */
+.admin-list-item {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border: 2px solid #333;
+  padding: 12px;
+}
+
 .pixel-group label {
   color: #00ffcc;
+}
+
+.checkbox-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 
 .pixel-input {

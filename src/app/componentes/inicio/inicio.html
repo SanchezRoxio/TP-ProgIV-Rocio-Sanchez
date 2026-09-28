@@ -52,14 +52,15 @@
     </div>
     
     <div class="genres-filter">
-      <button class="filter-btn" (click)="seleccionarGenero('TODOS')">TODOS</button>
-      <button class="filter-btn" (click)="seleccionarGenero('Acción')">ACCIÓN</button>
-      <button class="filter-btn" (click)="seleccionarGenero('Ciencia Ficción')">CIENCIA FICCIÓN</button>
-      <button class="filter-btn" (click)="seleccionarGenero('Aventura')">AVENTURA</button>
-       <button class="filter-btn" (click)="seleccionarGenero('Comedia')">COMEDIA</button>
-      <button class="filter-btn" (click)="seleccionarGenero('Drama')">DRAMA</button>
-      <button class="filter-btn" (click)="seleccionarGenero('Terror')">TERROR</button>
-      <button class="filter-btn" (click)="seleccionarGenero('Misterio')">MISTERIO</button>
+      <button class="filter-btn" [class.activo]="generosSeleccionados().length === 0" (click)="toggleGenero('TODOS')">TODOS</button>
+      <button class="filter-btn" [class.activo]="generosSeleccionados().includes('Acción')" (click)="toggleGenero('Acción')">ACCIÓN</button>
+      <button class="filter-btn" [class.activo]="generosSeleccionados().includes('Ciencia Ficción')" (click)="toggleGenero('Ciencia Ficción')">CIENCIA FICCIÓN</button>
+      <button class="filter-btn" [class.activo]="generosSeleccionados().includes('Aventura')" (click)="toggleGenero('Aventura')">AVENTURA</button>
+      <button class="filter-btn" [class.activo]="generosSeleccionados().includes('Comedia')" (click)="toggleGenero('Comedia')">COMEDIA</button>
+      <button class="filter-btn" [class.activo]="generosSeleccionados().includes('Drama')" (click)="toggleGenero('Drama')">DRAMA</button>
+      <button class="filter-btn" [class.activo]="generosSeleccionados().includes('Terror')" (click)="toggleGenero('Terror')">TERROR</button>
+      <button class="filter-btn" [class.activo]="generosSeleccionados().includes('Thriller Psicológico')" (click)="toggleGenero('Thriller Psicológico')">THRILLER PSICOLÓGICO</button>
+      <button class="filter-btn" [class.activo]="generosSeleccionados().includes('Misterio')" (click)="toggleGenero('Misterio')">MISTERIO</button>
     </div>
   </section>
 
@@ -68,7 +69,7 @@
     <h2 class="section-subtitle">CARTELERA GENERAL</h2>
     <div class="catalogo-grid">
       <!-- Filtro las pelis usando el custom pipe por texto y genero -->
-      @for (peli of peliculas() | filtroPelis: filtroBusqueda() : generoSeleccionado(); track peli.id) {
+      @for (peli of peliculasCartelera() | filtroPelis: filtroBusqueda() : generosSeleccionados(); track peli.id) {
         <div class="pixel-card">
           @if (peli.imagen) {
             <img [src]="peli.imagen" alt="Póster" class="peli-poster" />
@@ -88,4 +89,28 @@
       }
     </div>
   </section>
+
+      <!-- Proximamente -->
+  @if (proximamente().length > 0) {
+    <section class="top-section">
+      <h2 class="section-subtitle">⭐ PRÓXIMAMENTE ⭐</h2>
+      <div class="top-grid">
+        @for (peli of proximamente(); track peli.id) {
+          <div class="pixel-card top-card">
+            @if (peli.imagen) {
+              <img [src]="peli.imagen" alt="Póster" class="peli-poster" />
+            }
+            <h3 class="peli-title">{{ peli.titulo }}</h3>
+            <p class="peli-info">Estreno: {{ peli.fecha_estreno }}</p>
+            @if (misAlertas().includes(peli.id)) {
+              <button class="pixel-btn" disabled>✓ TE AVISAREMOS</button>
+            } @else {
+              <button class="pixel-btn" (click)="activarAlerta(peli.id)">🔔 AVISARME</button>
+            }
+          </div>
+        }
+      </div>
+    </section>
+  }
+
 </div>

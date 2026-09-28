@@ -28,8 +28,8 @@
         <h3>SELECCIONAR FUNCIÓN / HORARIO</h3>
         <div class="horarios-grid">
           <button *ngFor="let f of p.funciones" class="pixel-btn-horario" (click)="seleccionarFuncion(f.id)">
+            <span class="dia">{{ f.dia }}</span>
             <span class="hora">{{ f.horario }}</span>
-            <span class="sala">{{ f.sala }}</span>
           </button>
         </div>
       </div>

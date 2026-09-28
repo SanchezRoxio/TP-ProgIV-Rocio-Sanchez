@@ -17,7 +17,7 @@
   font-size: 22px;
   text-shadow: 4px 4px 0px #ff0055;
   letter-spacing: 2px;
-  margin-right: 40%;
+  margin-right: 30%;
 }
 
 .section-subtitle {
@@ -51,7 +51,7 @@
 }
 
 .top-card {
-  box-shadow: 8px 8px 0px #34796c;
+  box-shadow: 8px 8px 0px #b6b035;
 }
 
 .badge-top {
@@ -140,6 +140,12 @@
   background-color: #00ffcc;
   color: #000;
   box-shadow: 2px 2px 0px #fff;
+}
+
+.filter-btn.activo {
+  background-color: #00ffcc;
+  color: #000;
+  box-shadow: 2px 2px 0px #ff0055;
 }
 
 .pixel-btn {

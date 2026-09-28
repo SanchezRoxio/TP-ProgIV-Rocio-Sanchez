@@ -8,6 +8,8 @@
     <button class="pixel-tab-btn" (click)="cambiarSeccion('peliculas')">PELÍCULAS & FUNCIONES</button>
     <button class="pixel-tab-btn" (click)="cambiarSeccion('salas')">SALAS</button>
     <button class="pixel-tab-btn" (click)="cambiarSeccion('candy')">CANDY BAR</button>
+    <button class="pixel-tab-btn" (click)="cambiarSeccion('combos')">COMBOS</button>
+    <button class="pixel-tab-btn" (click)="cambiarSeccion('cupones')">CUPONES</button>
     <button class="pixel-tab-btn" (click)="cambiarSeccion('reportes')">REPORTES & LOGS</button>
   </div>
 
@@ -48,47 +50,147 @@
           <input type="text" formControlName="generos" placeholder="Acción, Aventura" class="pixel-input" />
         </div>
 
-        <div formArrayName="funciones">
-          @for (funcion of funciones.controls; track funcion; let i = $index) {
-            <div [formGroupName]="i" class="pixel-group">
-              <label>DÍA:</label>
-              <select formControlName="dia" class="pixel-input">
-                <option value="Lunes">Lunes</option>
-                <option value="Martes">Martes</option>
-                <option value="Miércoles">Miércoles</option>
-                <option value="Jueves">Jueves</option>
-                <option value="Viernes">Viernes</option>
-                <option value="Sábado">Sábado</option>
-                <option value="Domingo">Domingo</option>
-              </select>
+        <div class="pixel-group">
+          <label>FECHA DE ESTRENO (dejar vacío si ya está en cartelera):</label>
+          <input type="date" formControlName="fecha_estreno" class="pixel-input" />
+        </div>
+        <div class="pixel-group">
+          <label>PRECIO DE PREVENTA (opcional, $):</label>
+          <input type="number" formControlName="precio_preventa" placeholder="Ej: 3000" class="pixel-input" />
+        </div>
 
-              <label>HORARIO:</label>
-              <input type="text" formControlName="horario" placeholder="18:00" class="pixel-input" />
+        @if (!editandoPeliculaId()) {
+          <div formArrayName="funciones">
+            @for (funcion of funciones.controls; track funcion; let i = $index) {
+              <div [formGroupName]="i" class="pixel-group">
+                <label>DÍA:</label>
+                <select formControlName="dia" class="pixel-input">
+                  <option value="Lunes">Lunes</option>
+                  <option value="Martes">Martes</option>
+                  <option value="Miércoles">Miércoles</option>
+                  <option value="Jueves">Jueves</option>
+                  <option value="Viernes">Viernes</option>
+                  <option value="Sábado">Sábado</option>
+                  <option value="Domingo">Domingo</option>
+                </select>
 
-              <label>FORMATO:</label>
-              <select formControlName="formato" class="pixel-input">
-                <option value="2D">2D</option>
-                <option value="3D">3D</option>
-                <option value="4D">4D</option>
-              </select>
+                <label>HORARIO:</label>
+                <input type="text" formControlName="horario" placeholder="18:00" class="pixel-input" />
 
-              <label>IDIOMA:</label>
-              <select formControlName="idioma" class="pixel-input">
-                <option value="castellano">Castellano</option>
-                <option value="subtitulada">Subtitulada</option>
-              </select>
+                <label>FORMATO:</label>
+                <select formControlName="formato" class="pixel-input">
+                  <option value="2D">2D</option>
+                  <option value="3D">3D</option>
+                  <option value="4D">4D</option>
+                  <option value="5D">5D</option>
+                </select>
 
-              @if (funciones.length > 1) {
-                <button type="button" class="pixel-btn-back" (click)="eliminarFuncion(i)">✕ QUITAR</button>
+                <label>IDIOMA:</label>
+                <select formControlName="idioma" class="pixel-input">
+                  <option value="castellano">Castellano</option>
+                  <option value="subtitulada">Subtitulada</option>
+                </select>
+
+                @if (funciones.length > 1) {
+                  <button type="button" class="pixel-btn-back" (click)="eliminarFuncion(i)">✕ QUITAR</button>
+                }
+              </div>
+            }
+          </div>
+
+          <button type="button" class="pixel-btn-back" (click)="agregarFuncion()">+ AGREGAR OTRA FUNCIÓN</button>
+        } @else {
+          <p class="pixel-info">Editando la película no se tocan sus funciones ya programadas.</p>
+        }
+
+        <button type="submit" class="pixel-btn">{{ editandoPeliculaId() ? 'GUARDAR CAMBIOS' : 'GUARDAR PELÍCULA Y FUNCIONES' }}</button>
+        @if (editandoPeliculaId()) {
+          <button type="button" class="pixel-btn-back" (click)="cancelarEdicionPelicula()">CANCELAR EDICIÓN</button>
+        }
+      </form>
+
+      <h2 style="margin-top: 40px;">PELÍCULAS CARGADAS</h2>
+      @for (pelicula of peliculasList(); track pelicula.id) {
+        <div>
+          <div class="admin-list-item">
+            <span>{{ pelicula.titulo }} — {{ pelicula.clasificacion }}</span>
+            @if (confirmandoBorrarPeliculaId() === pelicula.id) {
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <span style="color: #ff0055;">¿Borrar esta película?</span>
+                <button type="button" class="pixel-btn-back" (click)="borrarPelicula(pelicula.id)">SÍ, BORRAR</button>
+                <button type="button" class="pixel-btn-back" (click)="cancelarBorrarPelicula()">CANCELAR</button>
+              </div>
+            } @else {
+              <div style="display: flex; gap: 10px;">
+                <button type="button" class="pixel-btn-back" (click)="toggleFunciones(pelicula.id)">{{ peliculaExpandidaId() === pelicula.id ? 'OCULTAR FUNCIONES' : 'VER FUNCIONES' }}</button>
+                <button type="button" class="pixel-btn-back" (click)="editarPelicula(pelicula)">EDITAR</button>
+                <button type="button" class="pixel-btn-back" (click)="pedirConfirmacionBorrarPelicula(pelicula.id)">BORRAR</button>
+              </div>
+            }
+          </div>
+
+          @if (peliculaExpandidaId() === pelicula.id) {
+            <div style="border: 1px dashed #444; padding: 10px; margin-bottom: 10px;">
+              @for (funcion of funcionesPorPelicula()[pelicula.id] || []; track funcion.id) {
+                @if (editandoFuncionId() === funcion.id) {
+                  <form [formGroup]="funcionEditForm" (ngSubmit)="guardarEdicionFuncion(pelicula.id)" class="pixel-form" style="margin-bottom: 10px;">
+                    <div class="pixel-group">
+                      <label>DÍA:</label>
+                      <select formControlName="dia" class="pixel-input">
+                        <option value="Lunes">Lunes</option>
+                        <option value="Martes">Martes</option>
+                        <option value="Miércoles">Miércoles</option>
+                        <option value="Jueves">Jueves</option>
+                        <option value="Viernes">Viernes</option>
+                        <option value="Sábado">Sábado</option>
+                        <option value="Domingo">Domingo</option>
+                      </select>
+                      <label>HORARIO:</label>
+                      <input type="text" formControlName="horario" placeholder="18:00" class="pixel-input" />
+                      <label>FORMATO:</label>
+                      <select formControlName="formato" class="pixel-input">
+                        <option value="2D">2D</option>
+                        <option value="3D">3D</option>
+                        <option value="4D">4D</option>
+                        <option value="5D">5D</option>
+                      </select>
+                      <label>IDIOMA:</label>
+                      <select formControlName="idioma" class="pixel-input">
+                        <option value="castellano">Castellano</option>
+                        <option value="subtitulada">Subtitulada</option>
+                      </select>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                      <button type="submit" class="pixel-btn">GUARDAR</button>
+                      <button type="button" class="pixel-btn-back" (click)="cancelarEdicionFuncion()">CANCELAR</button>
+                    </div>
+                  </form>
+                } @else {
+                  <div class="admin-list-item" style="border-color: #222;">
+                    <span>{{ funcion.dia }} {{ funcion.horario }} — {{ funcion.formato }}, {{ funcion.idioma }}</span>
+                    @if (confirmandoBorrarFuncionId() === funcion.id) {
+                      <div style="display: flex; gap: 10px; align-items: center;">
+                        <span style="color: #ff0055;">¿Borrar?</span>
+                        <button type="button" class="pixel-btn-back" (click)="borrarFuncionExistente(funcion.id, pelicula.id)">SÍ</button>
+                        <button type="button" class="pixel-btn-back" (click)="cancelarBorrarFuncion()">NO</button>
+                      </div>
+                    } @else {
+                      <div style="display: flex; gap: 10px;">
+                        <button type="button" class="pixel-btn-back" (click)="editarFuncionExistente(funcion)">EDITAR</button>
+                        <button type="button" class="pixel-btn-back" (click)="pedirConfirmacionBorrarFuncion(funcion.id)">BORRAR</button>
+                      </div>
+                    }
+                  </div>
+                }
+              } @empty {
+                <p class="pixel-info">Esta película no tiene funciones cargadas.</p>
               }
             </div>
           }
         </div>
-
-        <button type="button" class="pixel-btn-back" (click)="agregarFuncion()">+ AGREGAR OTRA FUNCIÓN</button>
-
-        <button type="submit" class="pixel-btn">GUARDAR PELÍCULA Y FUNCIONES</button>
-      </form>
+      } @empty {
+        <p class="pixel-info">No hay películas cargadas todavía.</p>
+      }
     </section>
   }
 
@@ -102,8 +204,33 @@
           <label>NOMBRE DE LA SALA:</label>
           <input type="text" formControlName="nombre" placeholder="Sala" class="pixel-input" />
         </div>
-        <button type="submit" class="pixel-btn">CREAR SALA</button>
+
+        <button type="submit" class="pixel-btn">{{ editandoSalaId() ? 'GUARDAR CAMBIOS' : 'CREAR SALA' }}</button>
+        @if (editandoSalaId()) {
+          <button type="button" class="pixel-btn-back" (click)="cancelarEdicionSala()">CANCELAR EDICIÓN</button>
+        }
       </form>
+
+      <h2 style="margin-top: 40px;">SALAS CARGADAS</h2>
+      @for (sala of salasList(); track sala.id) {
+        <div class="admin-list-item">
+          <span>{{ sala.nombre }}</span>
+          @if (confirmandoBorrarSalaId() === sala.id) {
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span style="color: #ff0055;">¿Borrar esta sala?</span>
+              <button type="button" class="pixel-btn-back" (click)="borrarSala(sala.id)">SÍ, BORRAR</button>
+              <button type="button" class="pixel-btn-back" (click)="cancelarBorrarSala()">CANCELAR</button>
+            </div>
+          } @else {
+            <div style="display: flex; gap: 10px;">
+              <button type="button" class="pixel-btn-back" (click)="editarSala(sala)">EDITAR</button>
+              <button type="button" class="pixel-btn-back" (click)="pedirConfirmacionBorrarSala(sala.id)">BORRAR</button>
+            </div>
+          }
+        </div>
+      } @empty {
+        <p class="pixel-info">No hay salas cargadas todavía.</p>
+      }
     </section>
   }
 
@@ -137,15 +264,161 @@
 
       <h2 style="margin-top: 40px;">PRODUCTOS CARGADOS</h2>
       @for (producto of candyList(); track producto.id) {
-        <div class="pixel-group" style="border: 2px solid #333; padding: 12px;">
+        <div class="admin-list-item">
           <span>{{ producto.nombre }} — {{ producto.categoria }} — ${{ producto.precio }}</span>
-          <div style="display: flex; gap: 10px;">
-            <button type="button" class="pixel-btn-back" (click)="editarCandy(producto)">EDITAR</button>
-            <button type="button" class="pixel-btn-back" (click)="borrarCandy(producto.id)">BORRAR</button>
-          </div>
+          @if (confirmandoBorrarCandyId() === producto.id) {
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span style="color: #ff0055;">¿Borrar este producto?</span>
+              <button type="button" class="pixel-btn-back" (click)="borrarCandy(producto.id)">SÍ, BORRAR</button>
+              <button type="button" class="pixel-btn-back" (click)="cancelarBorrarCandy()">CANCELAR</button>
+            </div>
+          } @else {
+            <div style="display: flex; gap: 10px;">
+              <button type="button" class="pixel-btn-back" (click)="editarCandy(producto)">EDITAR</button>
+              <button type="button" class="pixel-btn-back" (click)="pedirConfirmacionBorrarCandy(producto.id)">BORRAR</button>
+            </div>
+          }
         </div>
       } @empty {
         <p class="pixel-info">No hay productos cargados todavía.</p>
+      }
+    </section>
+  }
+
+  <!-- SECCIÓN COMBOS -->
+  @if (seccionActiva() === 'combos') {
+    <section class="admin-section">
+      <h2>GESTIÓN DE COMBOS</h2>
+      <p class="pixel-info">Elegí un nombre, un precio fijo, y cuánto de cada producto va incluido (dejá en 0 los que no formen parte del combo).</p>
+
+      <form [formGroup]="comboForm" (ngSubmit)="guardarCombo()" class="pixel-form">
+        <div class="pixel-group">
+          <label>NOMBRE DEL COMBO:</label>
+          <input type="text" formControlName="nombre" placeholder="Combo Grande" class="pixel-input" />
+        </div>
+        <div class="pixel-group">
+          <label>PRECIO FIJO ($):</label>
+          <input type="number" formControlName="precio" class="pixel-input" />
+        </div>
+
+        <h3>PRODUCTOS INCLUIDOS (cantidad de cada uno)</h3>
+        @for (producto of candyList(); track producto.id) {
+          <div class="pixel-group">
+            <label>{{ producto.nombre }} (normalmente ${{ producto.precio }}):</label>
+            <input
+              type="number"
+              min="0"
+              placeholder="0"
+              class="pixel-input"
+              [value]="cantidadesCombo()[producto.id] || 0"
+              (change)="cambiarCantidadCombo(producto.id, $any($event.target).value)"
+            />
+          </div>
+        } @empty {
+          <p class="pixel-info">Primero cargá productos en la pestaña CANDY BAR.</p>
+        }
+
+        <button type="submit" class="pixel-btn">{{ editandoComboId() ? 'GUARDAR CAMBIOS' : 'CREAR COMBO' }}</button>
+        @if (editandoComboId()) {
+          <button type="button" class="pixel-btn-back" (click)="cancelarEdicionCombo()">CANCELAR EDICIÓN</button>
+        }
+      </form>
+
+      <h2 style="margin-top: 40px;">COMBOS CARGADOS</h2>
+      @for (combo of combosList(); track combo.id) {
+        <div class="admin-list-item">
+          <span>
+            {{ combo.nombre }} — ${{ combo.precio }}
+            <span class="pixel-info">
+              Incluye:
+              @for (item of combo.combo_items; track item.candy.id; let ultimo = $last) {
+                {{ item.cantidad }}x {{ item.candy.nombre }}@if (!ultimo) {, }
+              }
+            </span>
+          </span>
+          @if (confirmandoBorrarComboId() === combo.id) {
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span style="color: #ff0055;">¿Borrar este combo?</span>
+              <button type="button" class="pixel-btn-back" (click)="borrarCombo(combo.id)">SÍ, BORRAR</button>
+              <button type="button" class="pixel-btn-back" (click)="cancelarBorrarCombo()">CANCELAR</button>
+            </div>
+          } @else {
+            <div style="display: flex; gap: 10px;">
+              <button type="button" class="pixel-btn-back" (click)="editarCombo(combo)">EDITAR</button>
+              <button type="button" class="pixel-btn-back" (click)="pedirConfirmacionBorrarCombo(combo.id)">BORRAR</button>
+            </div>
+          }
+        </div>
+      } @empty {
+        <p class="pixel-info">No hay combos cargados todavía.</p>
+      }
+    </section>
+  }
+
+  <!-- SECCIÓN CUPONES -->
+  @if (seccionActiva() === 'cupones') {
+    <section class="admin-section">
+      <h2>GESTIÓN DE CUPONES</h2>
+      <p class="pixel-info">El código se guarda en mayúsculas. Si dejás la fecha de vencimiento vacía, el cupón no vence nunca.</p>
+
+      <form [formGroup]="cuponForm" (ngSubmit)="guardarCupon()" class="pixel-form">
+        <div class="pixel-group">
+          <label>CÓDIGO:</label>
+          <input type="text" formControlName="codigo" placeholder="BIENVENIDA20" class="pixel-input" />
+        </div>
+        <div class="pixel-group">
+          <label>DESCUENTO (%):</label>
+          <input type="number" formControlName="descuento_porcentaje" min="1" max="100" class="pixel-input" />
+        </div>
+        <div class="pixel-group">
+          <label>FECHA DE VENCIMIENTO (opcional):</label>
+          <input type="date" formControlName="fecha_vencimiento" class="pixel-input" />
+        </div>
+        <div class="pixel-group">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="solo_mayores_50" />
+            Solo para usuarios de 50 años o más
+          </label>
+        </div>
+        <div class="pixel-group">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="solo_primera_compra" />
+            Solo para la primera compra del usuario
+          </label>
+        </div>
+
+        <button type="submit" class="pixel-btn">{{ editandoCuponId() ? 'GUARDAR CAMBIOS' : 'CREAR CUPÓN' }}</button>
+        @if (editandoCuponId()) {
+          <button type="button" class="pixel-btn-back" (click)="cancelarEdicionCupon()">CANCELAR EDICIÓN</button>
+        }
+      </form>
+
+      <h2 style="margin-top: 40px;">CUPONES CARGADOS</h2>
+      @for (cupon of cuponesList(); track cupon.id) {
+        <div class="admin-list-item">
+          <span>
+            {{ cupon.codigo }} — {{ cupon.descuento_porcentaje }}%
+            @if (cupon.fecha_vencimiento) { (vence {{ cupon.fecha_vencimiento | date:'dd/MM/yyyy'}})}
+            @if (cupon.solo_mayores_50) {<span style="color: #ffe600;">(solo +50 años)</span> }
+            @if (cupon.solo_primera_compra) { <span style="color: #ffe600;">(solo 1ra compra)</span> }
+            <span [style.color]="cupon.activo ? '#00ff66' : '#ff0055'"> {{ cupon.activo ? 'ACTIVO' : 'INACTIVO' }}</span>
+          </span>
+          @if (confirmandoBorrarCuponId() === cupon.id) {
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span style="color: #ff0055;">¿Borrar este cupón?</span>
+              <button type="button" class="pixel-btn-back" (click)="borrarCupon(cupon.id)">SÍ, BORRAR</button>
+              <button type="button" class="pixel-btn-back" (click)="cancelarBorrarCupon()">CANCELAR</button>
+            </div>
+          } @else {
+            <div style="display: flex; gap: 10px;">
+              <button type="button" class="pixel-btn-back" (click)="editarCupon(cupon)">EDITAR</button>
+              <button type="button" class="pixel-btn-back" (click)="toggleActivoCupon(cupon)">{{ cupon.activo ? 'DESACTIVAR' : 'ACTIVAR' }}</button>
+              <button type="button" class="pixel-btn-back" (click)="pedirConfirmacionBorrarCupon(cupon.id)">BORRAR</button>
+            </div>
+          }
+        </div>
+      } @empty {
+        <p class="pixel-info">No hay cupones cargados todavía.</p>
       }
     </section>
   }
@@ -160,6 +433,22 @@
         <button class="pixel-btn" (click)="exportarPDF()">EXPORTAR A PDF 📄</button>
         <button class="pixel-btn" (click)="exportarExcel()">EXPORTAR A EXCEL 📊</button>
       </div>
+
+      <h2 style="margin-top: 40px;">LOG DE AUDITORÍA</h2>
+      <p class="pixel-info">Registro de acciones importantes hechas desde este panel (solo lectura).</p>
+      @for (log of logsList(); track log.id) {
+        <div class="pixel-group" style="border: 2px solid #333; padding: 12px;">
+          <span>{{ log.accion }}</span>
+          <span class="pixel-info">{{ log.detalle }}</span>
+          <span class="pixel-info">
+            {{ log.usuarios?.nombre }} {{ log.usuarios?.apellido }}
+            @if (!log.usuarios) { Usuario eliminado }
+            — {{ log.created_at | date:'dd/MM/yyyy HH:mm' }}
+          </span>
+        </div>
+      } @empty {
+        <p class="pixel-info">Todavía no hay acciones registradas.</p>
+      }
     </section>
   }
 </div>

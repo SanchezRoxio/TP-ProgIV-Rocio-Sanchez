@@ -48,22 +48,45 @@ export class PerfilComponent {
     });
   }
 
-  private async cargarHistorial(usuarioId: string) {
+private async cargarHistorial(usuarioId: string) {
   try {
-    const entradas = await this.authService.obtenerMisEntradas(usuarioId);
-    this.historialEntradas.set(entradas.map((e: any) => ({
-      pelicula: e.funciones?.peliculas?.titulo ?? 'Película',
-      fecha: e.funciones?.dia ?? '',
-      sala: e.funciones?.salas?.nombre ?? '',
-      asientos: (e.entrada_butacas || []).map((eb: any) => `${eb.butacas.fila}-${eb.butacas.numero}`)
-    })));
-    } catch (err) {
+    const [entradas, calificaciones] = await Promise.all([
+      this.authService.obtenerMisEntradas(usuarioId),
+      this.authService.obtenerMisCalificaciones(usuarioId)
+    ]);
+
+    const mapaCalificaciones = new Map<number, number>();
+    calificaciones.forEach((c: any) => mapaCalificaciones.set(c.pelicula_id, c.estrellas));
+
+    // entradas viene ordenado de más nueva a más vieja (obtenerMisEntradas hace
+    // order by created_at desc), asi que si ya tengo la pelicula en el mapa
+    // significa que ya guardé la compra más reciente de esa peli, y esta que
+    // estoy viendo ahora es una repetida más vieja -> la salteo
+    const peliculasVistas = new Map<number, any>();
+
+    entradas.forEach((e: any) => {
+      const peliculaId = e.funciones?.peliculas?.id ?? null;
+      if (!peliculaId || peliculasVistas.has(peliculaId)) return;
+
+      peliculasVistas.set(peliculaId, {
+        peliculaId,
+        pelicula: e.funciones?.peliculas?.titulo ?? 'Película',
+        imagen: e.funciones?.peliculas?.imagen ?? '',
+        fecha: e.funciones?.dia ?? '',
+        sala: e.funciones?.salas?.nombre ?? '',
+        asientos: (e.entrada_butacas || []).map((eb: any) => `${eb.butacas.fila}-${eb.butacas.numero}`),
+        miCalificacion: mapaCalificaciones.get(peliculaId) ?? null
+      });
+    });
+
+    this.historialEntradas.set(Array.from(peliculasVistas.values()));
+  } catch (err) {
     console.error('Error al cargar historial de entradas:', err);
     this.historialEntradas.set([]);
-    }
   }
+   }
 
   volverInicio() {
     this.router.navigate(['/inicio']);
   }
-}
+ }

@@ -19,6 +19,31 @@
     }
   </div> 
 
+    @if (combos().length > 0) {
+    <h3 class="combos-title">⭐ COMBOS DESTACADOS ⭐</h3>
+    <div class="candy-grid combos-grid">
+      @for (combo of combos(); track combo.id) {
+        <div class="pixel-card-candy pixel-card-combo">
+          <h3 class="prod-name">{{ combo.nombre }}</h3>
+          <p class="combo-incluye">
+            Incluye:
+            @for (item of combo.combo_items; track item.candy.id; let ultimo = $last) {
+              {{ item.cantidad }}x {{ item.candy.nombre }}@if (!ultimo) {, }
+            }
+          </p>
+          <p class="prod-precio">$ {{ combo.precio }}</p>
+
+          <div class="contador-box">
+            <button class="pixel-btn-count" (click)="cambiarCantidadCombo(combo.id, -1)">-</button>
+            <span class="cantidad-num">{{ combo.cantidad }}</span>
+            <button class="pixel-btn-count" (click)="cambiarCantidadCombo(combo.id, 1)">+</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+
  <div class="resumen-candy">
     <p>Total Candy: $ {{ calcularTotal() }}</p>
     

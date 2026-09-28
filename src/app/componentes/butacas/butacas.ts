@@ -34,6 +34,7 @@ export class ButacasComponent implements OnInit, OnDestroy {
   butacas = signal<Butaca[]>([]);
   seleccionadas = signal<string[]>([]);
   private detenerSuscripcion: (() => void) | null = null;
+  private datosPelicula: any = null;
 
   async ngOnInit() {
     this.funcionId = Number(this.route.snapshot.paramMap.get('funcionId'));
@@ -44,6 +45,7 @@ export class ButacasComponent implements OnInit, OnDestroy {
 
     try {
       const funcion = await this.authService.obtenerFuncionPorId(this.funcionId);
+      this.datosPelicula = funcion.peliculas;
 
       const [butacasReales, ocupadas] = await Promise.all([
         this.authService.obtenerButacasDeSala(funcion.sala_id),
@@ -85,6 +87,22 @@ export class ButacasComponent implements OnInit, OnDestroy {
     return lista;
   }
 
+  private calcularPrecioButaca(tipo: string): number {
+    const precios: Record<string, number> = { general: 4000, discapacidad: 4000, vip: 6000 };
+    const pelicula = this.datosPelicula;
+
+    if (pelicula?.fecha_estreno && pelicula?.precio_preventa) {
+      const hoy = new Date();
+      const estreno = new Date(pelicula.fecha_estreno);
+      const diasHasta = (estreno.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24);
+      if (diasHasta >= 0 && diasHasta <= 7) {
+        return pelicula.precio_preventa;
+      }
+    }
+
+    return precios[tipo] ?? precios['general'];
+  }
+
   private marcarOcupada(butacaId: number) {
   this.butacas.update(asientos =>
     asientos.map(a => a.butacaId === butacaId ? { ...a, estado: 'ocupada' } : a)
@@ -122,12 +140,20 @@ export class ButacasComponent implements OnInit, OnDestroy {
     }
   }
 
+  // se usa en el template para avisar antes de pagar si eligió alguna butaca VIP,
+  // tal cual pide la consigna ("el usuario debe saber claramente que está
+  // comprando una butaca VIP antes de pagar")
+  haySeleccionVip(): boolean {
+    const ids = this.seleccionadas();
+    return this.butacas().some(b => ids.includes(b.id) && b.tipo === 'vip');
+  }
+
   confirmarCompra() {
     const idsSeleccionados = this.seleccionadas();
     const butacasSeleccionadas = this.butacas().filter(b => idsSeleccionados.includes(b.id));
     const seleccion = {
       funcionId: this.funcionId,
-      butacas: butacasSeleccionadas.map(b => ({ butacaId: b.butacaId, fila: b.fila, numero: b.numero, tipo: b.tipo }))
+      butacas: butacasSeleccionadas.map(b => ({ butacaId: b.butacaId, fila: b.fila, numero: b.numero, tipo: b.tipo, precio: this.calcularPrecioButaca(b.tipo) }))
     };
 
     this.router.navigate(['/candy'], { state: { seleccion } });
