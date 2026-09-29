@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <rect width="64" height="64" fill="#0b0b0e"/>
+  <rect x="4" y="4" width="56" height="56" fill="#000000" stroke="#ff0055" stroke-width="4"/>
+
+  <!-- claqueta de cine, en pixel art bloque a bloque -->
+  <rect x="12" y="14" width="40" height="8" fill="#ffe600"/>
+  <rect x="12" y="14" width="6" height="8" fill="#0b0b0e"/>
+  <rect x="22" y="14" width="6" height="8" fill="#0b0b0e"/>
+  <rect x="32" y="14" width="6" height="8" fill="#0b0b0e"/>
+  <rect x="42" y="14" width="6" height="8" fill="#0b0b0e"/>
+
+  <rect x="12" y="24" width="40" height="26" fill="#00ffcc"/>
+  <rect x="18" y="30" width="10" height="6" fill="#0b0b0e"/>
+  <rect x="34" y="30" width="10" height="6" fill="#0b0b0e"/>
+  <rect x="24" y="38" width="16" height="4" fill="#0b0b0e"/>
+</svg>

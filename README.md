@@ -76,6 +76,10 @@ En la pestaña "REPORTES & LOGS" del admin hay 3 gráficos de barras armados a m
 
 El admin tiene una pestaña de "Reportes & Logs" que muestra un registro de acciones importantes: quién creó una función, quién modificó un precio (de película, candy o cupón), quién creó o desactivó un cupón, etc. Cada log guarda el usuario, la acción, un detalle y la fecha/hora automática. Si guardar un log falla por algún motivo, no rompe la acción principal (por ejemplo, crear la función ya se hizo antes de intentar loguearla) — solo se avisa por consola.
 
+### PWA
+
+La app se puede instalar como aplicación. El service worker solo se activa en el build de producción (`ng build`), para no complicar el desarrollo con contenido cacheado viejo. Cachea los archivos de la app (JS/CSS/imágenes) para que cargue rápido y funcione offline.
+
 ## Decisiones técnicas que tomé
 
 - **Autenticación con Supabase Auth real**, no una tabla propia con contraseñas en texto plano. El login/registro pasa por el sistema de Auth de Supabase, y mi tabla de usuarios solo guarda los datos de perfil (nombre, fecha de nacimiento, rol, etc.), no la contraseña.
@@ -98,6 +102,6 @@ Necesita un archivo de entorno con las credenciales de Supabase (`src/app/enviro
 
 ## Estado actual
 
-Lo que ya funciona: registro/login, cartelera con búsqueda y filtro de género múltiple, reseñas con promedio, "Proximamente" con alertas de estreno, preventa con precio especial, selección de butacas en tiempo real (generales/accesibles/VIP), compra completa (entradas + candy + combos) con generación automatica de PDF y QR, validación de esas entradas por empleados (cámara o código manual), cupones configurables con restricciones de edad y primera compra, restricción de edad para películas, cancelación de compras con crédito real (hasta 2 horas antes de la función), "Mis películas" (con re-descarga del PDF de cualquier compra vieja), reportes reales de facturación/películas más vistas/candy más vendido (con exportación a PDF y Excel), y un panel de admin con CRUD completo de películas, funciones, salas, candy, combos, cupones y empleados, más log de auditoría.
+Lo que ya funciona: registro/login, cartelera con búsqueda y filtro de género múltiple, reseñas con promedio, "Proximamente" con alertas de estreno, preventa con precio especial, selección de butacas en tiempo real (generales/accesibles/VIP), compra completa (entradas + candy + combos) con generación automatica de PDF y QR, validación de esas entradas por empleados (cámara o código manual), cupones configurables con restricciones de edad y primera compra, restricción de edad para películas, cancelación de compras con crédito real (hasta 2 horas antes de la función), "Mis películas" (con re-descarga del PDF de cualquier compra vieja), reportes de facturación/películas más vistas/candy más vendido (con exportación a PDF y Excel), diseño responsive para el celu, instalación como PWA, y un panel de admin con CRUD completo de películas, funciones, salas, candy, combos, cupones y empleados, más log de auditoría.
 
-Lo que todavía falta: sistema de puntos de fidelización real, y la instalación como PWA.
+Lo que todavía falta: sistema de puntos de fidelización real.
