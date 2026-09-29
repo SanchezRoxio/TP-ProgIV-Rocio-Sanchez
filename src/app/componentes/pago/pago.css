@@ -39,11 +39,23 @@
   background: #15151c;
   border: 3px solid #ff0055;
   padding: 20px;
-  width: 400px;
+  width: 100%;
+  max-width: 400px;
   display: flex;
   flex-direction: column;
   gap: 15px;
   box-shadow: 4px 4px 0px #ff0055;
+  box-sizing: border-box;
+}
+
+@media (max-width: 500px) {
+  .pago-container {
+    padding: 12px;
+  }
+
+  .resumen-seccion, .opciones-pago {
+    padding: 12px;
+  }
 }
 
 .section-subtitle {

@@ -1,8 +1,11 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import jsPDF from 'jspdf';
+import * as XLSX from 'xlsx';
 import { AuthService } from '../../services/auth.service';
+import { claveDia, claveSemana, claveMes } from '../../utilidades/agrupar-fechas';
 
 @Component({
   selector: 'app-admin',
@@ -13,7 +16,6 @@ import { AuthService } from '../../services/auth.service';
 })
 export class AdminComponent implements OnInit {
   private fb = inject(FormBuilder);
-  private router = inject(Router);
   private authService = inject(AuthService);
 
   seccionActiva = signal<string>('peliculas');
@@ -61,6 +63,18 @@ export class AdminComponent implements OnInit {
   editandoCuponId = signal<number | null>(null);
   confirmandoBorrarCuponId = signal<number | null>(null);
 
+  // gestion de empleados: busco un usuario ya registrado por email y le cambio el rol
+  emailBusquedaEmpleado = '';
+  empleadosList = signal<any[]>([]);
+  usuarioEncontrado = signal<any>(null);
+
+  // REPORTES
+  facturacionPorDia = signal<{ dia: string; total: number; cantidad: number }[]>([]);
+  vistaPeriodo = signal<'semana' | 'mes'>('semana');
+  peliculasMasVistas = signal<{ nombre: string; cantidad: number }[]>([]);
+  candyMasVendido = signal<{ nombre: string; cantidad: number }[]>([]);
+  private entradasReporte: any[] = []; // cache crudo, para no volver a pedirle a la db cuando cambiás semana/mes
+
   ngOnInit() {
     this.inicializarFormularios();
     this.cargarPeliculas();
@@ -69,6 +83,8 @@ export class AdminComponent implements OnInit {
     this.cargarCombos();
     this.cargarLogs();
     this.cargarCupones();
+    this.cargarEmpleados();
+    this.cargarReportes();
   }
 
   async cargarLogs() {
@@ -749,11 +765,197 @@ export class AdminComponent implements OnInit {
     }
   }
 
+  // GESTION DE EMPLEADOS
+
+  async cargarEmpleados() {
+    try {
+      const data = await this.authService.obtenerEmpleados();
+      this.empleadosList.set(data || []);
+    } catch (error) {
+      console.error('Error al cargar empleados:', error);
+    }
+  }
+
+  async buscarUsuarioParaEmpleado() {
+    if (!this.emailBusquedaEmpleado.trim()) return;
+    try {
+      this.mensajeError.set(null);
+      const usuario = await this.authService.buscarUsuarioPorEmail(this.emailBusquedaEmpleado);
+      if (!usuario) {
+        this.usuarioEncontrado.set(null);
+        this.mensajeError.set('⚠️ No hay ningún usuario registrado con ese email.');
+        return;
+      }
+      this.usuarioEncontrado.set(usuario);
+    } catch (error) {
+      this.mensajeError.set('❌ Error al buscar el usuario.');
+    }
+  }
+
+  async hacerEmpleado(usuario: any) {
+    try {
+      const usuarioActual = this.authService.usuarioActual();
+      await this.authService.cambiarRolUsuario(usuario.id, 'empleado');
+      await this.authService.registrarLog(usuarioActual?.id ?? null, 'Asignó rol empleado', `A ${usuario.email}`);
+      this.mensajeExito.set(`✅ ${usuario.email} ahora es empleado.`);
+      this.mensajeError.set(null);
+      this.usuarioEncontrado.set(null);
+      this.emailBusquedaEmpleado = '';
+      await this.cargarEmpleados();
+      await this.cargarLogs();
+    } catch (error) {
+      this.mensajeError.set('❌ No se pudo asignar el rol.');
+    }
+  }
+
+  // en vez de borrar el usuario, simplemente le devuelvo el rol de cliente
+  async quitarEmpleado(usuario: any) {
+    try {
+      const usuarioActual = this.authService.usuarioActual();
+      await this.authService.cambiarRolUsuario(usuario.id, 'cliente');
+      await this.authService.registrarLog(usuarioActual?.id ?? null, 'Quitó rol empleado', `A ${usuario.email}`);
+      this.mensajeExito.set(`🗑️ ${usuario.email} ya no es empleado.`);
+      this.mensajeError.set(null);
+      await this.cargarEmpleados();
+      await this.cargarLogs();
+    } catch (error) {
+      this.mensajeError.set('❌ No se pudo quitar el rol.');
+    }
+  }
+
+  async cargarReportes() {
+    try {
+      const [entradas, candy] = await Promise.all([
+        this.authService.obtenerReporteEntradas(),
+        this.authService.obtenerReporteCandy()
+      ]);
+
+      this.entradasReporte = entradas;
+      this.recalcularFacturacionPorDia();
+      this.recalcularPeliculasMasVistas();
+
+      const porCandy = new Map<string, number>();
+      candy.forEach((c: any) => {
+        const nombre = c.candy?.nombre ?? 'Producto eliminado';
+        porCandy.set(nombre, (porCandy.get(nombre) ?? 0) + c.cantidad);
+      });
+      this.candyMasVendido.set(
+        Array.from(porCandy.entries())
+          .map(([nombre, cantidad]) => ({ nombre, cantidad }))
+          .sort((a, b) => b.cantidad - a.cantidad)
+      );
+    } catch (error) {
+      console.error('Error al cargar reportes:', error);
+    }
+  }
+
+  private recalcularFacturacionPorDia() {
+    const porDia = new Map<string, { total: number; cantidad: number }>();
+    this.entradasReporte.forEach(e => {
+      const dia = claveDia(new Date(e.created_at));
+      const actual = porDia.get(dia) ?? { total: 0, cantidad: 0 };
+      actual.total += e.total;
+      actual.cantidad += 1;
+      porDia.set(dia, actual);
+    });
+
+    this.facturacionPorDia.set(
+      Array.from(porDia.entries())
+        .map(([dia, datos]) => ({ dia, ...datos }))
+        .sort((a, b) => b.dia.localeCompare(a.dia)) // el dia más reciente primero
+    );
+  }
+
+  // ranking de peliculas segun cuantas entradas se vendieron de cada una,
+  // pero solo contando la semana o el mes ACTUAL (no todo el historico junto)
+  private recalcularPeliculasMasVistas() {
+    const armarClave = this.vistaPeriodo() === 'semana' ? claveSemana : claveMes;
+    const clavePeriodoActual = armarClave(new Date());
+
+    const porPelicula = new Map<string, number>();
+    this.entradasReporte
+      .filter(e => armarClave(new Date(e.created_at)) === clavePeriodoActual)
+      .forEach(e => {
+        const titulo = e.funciones?.peliculas?.titulo ?? 'Película eliminada';
+        porPelicula.set(titulo, (porPelicula.get(titulo) ?? 0) + 1);
+      });
+
+    this.peliculasMasVistas.set(
+      Array.from(porPelicula.entries())
+        .map(([nombre, cantidad]) => ({ nombre, cantidad }))
+        .sort((a, b) => b.cantidad - a.cantidad)
+    );
+  }
+
+  cambiarVistaPeriodo(periodo: 'semana' | 'mes') {
+    this.vistaPeriodo.set(periodo);
+    this.recalcularPeliculasMasVistas();
+  }
+
+  // le sirven al template para calcular el ancho de cada barra como
+  // porcentaje del valor más alto (nunca 0, para no dividir por cero)
+  maxFacturacionDia(): number {
+    return Math.max(1, ...this.facturacionPorDia().map(f => f.total));
+  }
+
+  maxPeliculasVistas(): number {
+    return Math.max(1, ...this.peliculasMasVistas().map(p => p.cantidad));
+  }
+
+  maxCandyVendido(): number {
+    return Math.max(1, ...this.candyMasVendido().map(c => c.cantidad));
+  }
+
   exportarPDF() {
-    alert('📄 Exportando reporte de facturación a PDF...');
+    const doc = new jsPDF();
+    const filas = this.facturacionPorDia();
+
+    doc.setFontSize(16);
+    doc.text('Roxis Movies - Reporte de facturación', 14, 15);
+
+    doc.setFontSize(10);
+    let y = 28;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Fecha', 14, y);
+    doc.text('Entradas vendidas', 80, y);
+    doc.text('Facturación', 150, y);
+    doc.setFont('helvetica', 'normal');
+    y += 4;
+    doc.line(14, y, 196, y);
+    y += 8;
+
+    filas.forEach(fila => {
+      doc.text(fila.dia, 14, y);
+      doc.text(String(fila.cantidad), 80, y);
+      doc.text(`$${fila.total}`, 150, y);
+      y += 7;
+      if (y > 280) {
+        doc.addPage();
+        y = 20;
+      }
+    });
+
+    const totalGeneral = filas.reduce((acc, f) => acc + f.total, 0);
+    const entradasGeneral = filas.reduce((acc, f) => acc + f.cantidad, 0);
+    y += 3;
+    doc.line(14, y, 196, y);
+    y += 8;
+    doc.setFont('helvetica', 'bold');
+    doc.text(`TOTAL: ${entradasGeneral} entradas vendidas — $${totalGeneral}`, 14, y);
+
+    doc.save('reporte-facturacion.pdf');
   }
 
   exportarExcel() {
-    alert('📊 Exportando reporte de facturación a Excel...');
+    const filas = this.facturacionPorDia().map(f => ({
+      Fecha: f.dia,
+      'Entradas vendidas': f.cantidad,
+      'Facturación ($)': f.total
+    }));
+
+    const hoja = XLSX.utils.json_to_sheet(filas);
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hoja, 'Facturación');
+    XLSX.writeFile(libro, 'reporte-facturacion.xlsx');
   }
 }

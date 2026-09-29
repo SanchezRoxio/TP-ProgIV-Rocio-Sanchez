@@ -56,6 +56,22 @@ Los cupones no son solo un código y un porcentaje: cada uno se valida contra 3 
 
 Un invitado sin cuenta nunca puede usar los cupones de los tipos 2 y 3, porque no hay forma de verificar esos datos sin sesión.
 
+### Entrada con QR y PDF
+
+Al confirmar una compra, se genera automáticamente un PDF (con `jsPDF`) que se descarga solo, con los datos de la función, las butacas, el total pagado y un código QR (generado con la librería `qrcode`) que codifica un texto simple tipo `ENTRADA-123`. Si la película tiene restricción de edad, el PDF también lo aclara. Ese mismo código se puede volver a descargar en cualquier momento desde "Mis películas" en el perfil. El código es texto plano a propósito, para que un empleado lo pueda tipear a mano si el lector de QR falla ese día (como pide la consigna).
+
+### Validación de entradas por empleados
+
+En `/validar` (accesible para admins y para usuarios con rol `empleado`) hay una pantalla que lee el QR con la camara del dispositivo (librería `html5-qrcode`) o permite tipear el codigo a mano si el lector falla. Al encontrar la entrada, se puede marcar como "validada" (entro al cine) y, si compro candy o algun combo, marcar el candy como "entregado" por separado — son dos acciones independientes, porque el mismo QR se usa primero en la puerta del cine y despues en el candy bar, y una no debería bloquear a la otra. Cada acción, una vez hecha, no se puede repetir con esa misma entrada (el "QR deja de funcionar" para esa acción puntual). El admin puede asignar o sacar el rol de empleado a cualquier usuario ya registrado, desde la pestaña "Empleados" del panel.
+
+### Cancelación con crédito real
+
+Como las funciones son recurrentes (se repiten cada semana el mismo día y horario, no tienen una fecha puntual guardada en la base), para saber "cuánto falta para la función" calculo cuándo cae la próxima vez ese día+horario a partir de ahora mismo. Si todavía faltan 2 horas o más, el usuario puede cancelar su compra desde "Mis películas": la entrada se marca como cancelada, se liberan las butacas para que se puedan volver a vender, y en vez de devolverle la plata se le suma ese monto como crédito real a su cuenta (columna `credito` en `usuarios`, no un valor de mentira). Ese crédito se puede usar después en cualquier compra nueva, junto con otros métodos de pago (usa solo lo que haga falta para llegar a $0, el resto queda guardado para la próxima).
+
+### Reportes
+
+En la pestaña "REPORTES & LOGS" del admin hay 3 gráficos de barras armados a mano con divs (sin ninguna librería de gráficos): facturación y entradas vendidas por día, un ranking de películas más vistas (con un toggle para ver la semana actual o el mes actual), y el producto de candy bar que más se vendió. Los botones "EXPORTAR A PDF" y "EXPORTAR A EXCEL" ahora generan archivos con `jsPDF` y `xlsx` con la tabla de facturación por día.
+
 ### Log de auditoría
 
 El admin tiene una pestaña de "Reportes & Logs" que muestra un registro de acciones importantes: quién creó una función, quién modificó un precio (de película, candy o cupón), quién creó o desactivó un cupón, etc. Cada log guarda el usuario, la acción, un detalle y la fecha/hora automática. Si guardar un log falla por algún motivo, no rompe la acción principal (por ejemplo, crear la función ya se hizo antes de intentar loguearla) — solo se avisa por consola.
@@ -82,6 +98,6 @@ Necesita un archivo de entorno con las credenciales de Supabase (`src/app/enviro
 
 ## Estado actual
 
-Lo que ya funciona de punta a punta: registro/login, cartelera con búsqueda y filtro de género múltiple, reseñas con promedio, "Próximamente" con alertas de estreno, preventa con precio especial, selección de butacas en tiempo real (generales/accesibles/VIP), compra completa (entradas + candy + combos), cupones configurables con restricciones de edad y primera compra, restricción de edad para películas, "Mis películas", y un panel de admin con CRUD completo de películas, funciones, salas, candy, combos y cupones, más log de auditoría.
+Lo que ya funciona: registro/login, cartelera con búsqueda y filtro de género múltiple, reseñas con promedio, "Proximamente" con alertas de estreno, preventa con precio especial, selección de butacas en tiempo real (generales/accesibles/VIP), compra completa (entradas + candy + combos) con generación automatica de PDF y QR, validación de esas entradas por empleados (cámara o código manual), cupones configurables con restricciones de edad y primera compra, restricción de edad para películas, cancelación de compras con crédito real (hasta 2 horas antes de la función), "Mis películas" (con re-descarga del PDF de cualquier compra vieja), reportes reales de facturación/películas más vistas/candy más vendido (con exportación a PDF y Excel), y un panel de admin con CRUD completo de películas, funciones, salas, candy, combos, cupones y empleados, más log de auditoría.
 
-Lo que todavía falta: generación de QR y PDF de la entrada, validación de entradas por parte de empleados (escaneo o código manual), cancelación de compras con crédito real, sistema de puntos de fidelización, reportes de facturación reales en el admin (hoy son botones de ejemplo), y la instalación como PWA.
+Lo que todavía falta: sistema de puntos de fidelización real, y la instalación como PWA.

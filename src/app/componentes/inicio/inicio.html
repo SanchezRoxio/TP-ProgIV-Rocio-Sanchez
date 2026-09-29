@@ -5,7 +5,8 @@
       <h1 class="main-title">ROXI'S MOVIES</h1>
        <!-- directiva estructural personalizada -->
       <button class="pixel-btn-candy" *appAdmin="'admin'" routerLink="/admin">ADMIN ⚙️</button>
-  
+      <button class="pixel-btn-candy" *appAdmin="'empleado'" routerLink="/validar">VALIDAR 🎫</button>
+
       <!--<button class="pixel-btn-candy" routerLink="/candy">CANDY BAR 🍿</button>  -->
       @if (usuarioLogueado()) {
         <button class="pixel-btn-candy" routerLink="/perfil">{{ nombreUsuario() }} 👤</button>
@@ -22,7 +23,7 @@
     <div class="top-grid">
       @for (peli of topPeliculas(); track peli.id) {
         <div class="pixel-card top-card">
-          <span class="badge-top">TOP</span>
+          <span class="badge-top">TOP ⭐</span>
           @if (peli.imagen) {
             <img [src]="peli.imagen" alt="Póster" class="peli-poster" />
           }

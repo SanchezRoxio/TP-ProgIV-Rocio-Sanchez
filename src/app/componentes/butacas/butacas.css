@@ -91,6 +91,14 @@
   gap: 5px;
   max-height: 75vh;
   overflow-y: auto;
+  /* la fila completa (30 columnas) es más ancha que la pantalla de un celular:
+     en vez de achicar tanto las butacas que dejen de ser tocables, dejo que
+     esta zona se deslice horizontalmente*/
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 10px 20px;
 }
 
@@ -99,7 +107,16 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  width: 100%;
+  width: max-content; /* que no se comprima: así el scroll horizontal hace su trabajo en vez de aplastar las butacas */
+  margin: 0 auto;
+}
+
+.hint-scroll {
+  display: none;
+  font-size: 9px;
+  color: #888;
+  text-align: center;
+  margin-bottom: 8px;
 }
 
 .label-fila {
@@ -197,4 +214,19 @@
 
 .pixel-asiento.ocupada:hover {
   border-color: #555 !important;
+}
+
+@media (max-width: 700px) {
+  .sala-container {
+    padding: 12px;
+  }
+
+  .hint-scroll {
+    display: block;
+  }
+
+  .leyenda-butacas {
+    font-size: 9px;
+    gap: 10px;
+  }
 }

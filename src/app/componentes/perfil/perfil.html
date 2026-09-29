@@ -12,14 +12,34 @@
       <p><strong>TIPO DE SANGRE:</strong> {{ tipoSangre() }}</p>
       <p><strong>COLOR DE OJOS:</strong> {{ colorOjos() }}</p>
       
+      @if (cuponBienvenida() && historialEntradas().length === 0) {
+        <div class="fidelizacion-box" style="border-color: #ffe600;">
+          <span class="puntos-badge">🎉 ¡BIENVENIDA/O!</span>
+          <p class="puntos-desc">Usá el código <strong>{{ cuponBienvenida().codigo }}</strong> para un {{ cuponBienvenida().descuento_porcentaje }}% de descuento en tu primera compra.</p>
+        </div>
+      }
+
       <div class="fidelizacion-box">
         <span class="puntos-badge">⭐ PUNTOS ROXI'S CLUB: {{ puntos() }} PTS</span>
         <p class="puntos-desc">¡Canjeá tus puntos por un combo de pochoclos gratis en el Candy Bar!</p>
       </div>
+
+      @if (credito() > 0) {
+        <div class="fidelizacion-box" style="border-color: #00ff66;">
+          <span class="puntos-badge" style="color: #00ff66;">💵 CRÉDITO DISPONIBLE: ${{ credito() }}</span>
+          <p class="puntos-desc">Lo podés usar en tu próxima compra, junto con otros métodos de pago.</p>
+        </div>
+      }
     </div>
 
     <div class="historial-section">
       <h3 class="section-title">🎬 MIS PELÍCULAS</h3>
+      @if (errorDescarga()) {
+        <p style="color: #ff0055; font-size: 12px;">{{ errorDescarga() }}</p>
+      }
+      @if (mensajeCancelacion()) {
+        <p style="color: #ffe600; font-size: 12px;">{{ mensajeCancelacion() }}</p>
+      }
 
       <div class="mis-peliculas-grid">
         @for (item of historialEntradas(); track item.peliculaId + item.fecha) {
@@ -28,11 +48,17 @@
               <img [src]="item.imagen" [alt]="item.pelicula" class="mini-poster" />
             }
             <h4 class="mini-poster-title">{{ item.pelicula }}</h4>
-            <p class="mini-poster-fecha">{{ item.fecha }}</p>
-            @if (item.miCalificacion) {
+            <p class="mini-poster-fecha">{{ item.fecha }} {{ item.horario }}</p>
+            @if (item.estado === 'cancelada') {
+              <p class="mini-poster-sin-calificar">🚫 Cancelada (te dimos crédito)</p>
+            } @else if (item.miCalificacion) {
               <p class="mini-poster-estrellas">{{ '⭐'.repeat(item.miCalificacion) }}</p>
             } @else {
               <p class="mini-poster-sin-calificar">Todavía no la calificaste</p>
+            }
+            <button class="pixel-btn-descargar" (click)="descargarEntrada(item.entradaId)">📄 DESCARGAR</button>
+            @if (puedeCancelar(item)) {
+              <button class="pixel-btn-descargar" style="border-color: #ff0055; color: #ff0055;" (click)="cancelarCompra(item)">🚫 CANCELAR</button>
             }
           </div>
         } @empty {

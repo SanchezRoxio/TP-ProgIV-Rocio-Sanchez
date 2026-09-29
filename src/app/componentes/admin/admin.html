@@ -10,6 +10,7 @@
     <button class="pixel-tab-btn" (click)="cambiarSeccion('candy')">CANDY BAR</button>
     <button class="pixel-tab-btn" (click)="cambiarSeccion('combos')">COMBOS</button>
     <button class="pixel-tab-btn" (click)="cambiarSeccion('cupones')">CUPONES</button>
+    <button class="pixel-tab-btn" (click)="cambiarSeccion('empleados')">EMPLEADOS</button>
     <button class="pixel-tab-btn" (click)="cambiarSeccion('reportes')">REPORTES & LOGS</button>
   </div>
 
@@ -423,18 +424,94 @@
     </section>
   }
 
+  <!-- SECCIÓN EMPLEADOS -->
+  @if (seccionActiva() === 'empleados') {
+    <section class="admin-section">
+      <h2>GESTIÓN DE EMPLEADOS</h2>
+      <p class="pixel-info">Los empleados y los admins pueden entrar a "/validar" para escanear o tipear el código de una entrada. Para hacer empleado a alguien, esa persona tiene que estar registrada primero.</p>
+
+      <div class="pixel-form">
+        <div class="pixel-group">
+          <label>EMAIL DEL USUARIO:</label>
+          <input type="text" [(ngModel)]="emailBusquedaEmpleado" placeholder="usuario@mail.com" class="pixel-input" (keyup.enter)="buscarUsuarioParaEmpleado()" />
+        </div>
+        <button type="button" class="pixel-btn" (click)="buscarUsuarioParaEmpleado()">BUSCAR USUARIO</button>
+      </div>
+
+      @if (usuarioEncontrado()) {
+        <div class="admin-list-item" style="margin-top: 15px;">
+          <span>{{ usuarioEncontrado().nombre }} {{ usuarioEncontrado().apellido }} — {{ usuarioEncontrado().email }} ({{ usuarioEncontrado().rol || 'cliente' }})</span>
+          <button type="button" class="pixel-btn-back" (click)="hacerEmpleado(usuarioEncontrado())">HACER EMPLEADO</button>
+        </div>
+      }
+
+      <h2 style="margin-top: 40px;">EMPLEADOS ACTUALES</h2>
+      @for (empleado of empleadosList(); track empleado.id) {
+        <div class="admin-list-item">
+          <span>{{ empleado.nombre }} {{ empleado.apellido }} — {{ empleado.email }}</span>
+          <button type="button" class="pixel-btn-back" (click)="quitarEmpleado(empleado)">QUITAR ROL</button>
+        </div>
+      } @empty {
+        <p class="pixel-info">No hay empleados cargados todavía.</p>
+      }
+    </section>
+  }
+
   <!-- SECCIÓN REPORTES -->
   @if (seccionActiva() === 'reportes') {
     <section class="admin-section">
-      <h2>FACTURACIÓN Y VENTAS</h2>
-      <p class="pixel-info">Aquí podrás visualizar estadísticas de recaudación y exportar los reportes solicitados por la administración.</p>
+      <h2>💰 FACTURACIÓN POR DÍA 💰</h2>
+      <p class="pixel-info">Cuánto se facturó y cuántas entradas se vendieron cada día (no cuenta lo cancelado, esa plata quedó como crédito).</p>
+
+      @for (fila of facturacionPorDia(); track fila.dia) {
+        <div class="barra-fila">
+          <span class="barra-label">{{ fila.dia }}</span>
+          <div class="barra-track">
+            <div class="barra-fill" [style.width.%]="(fila.total / maxFacturacionDia()) * 100" [title]="fila.cantidad + ' entradas — $' + fila.total"></div>
+          </div>
+          <span class="barra-valor">${{ fila.total }} ({{ fila.cantidad }})</span>
+        </div>
+      } @empty {
+        <p class="pixel-info">Todavía no hay ventas registradas.</p>
+      }
 
       <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; justify-content: center;">
         <button class="pixel-btn" (click)="exportarPDF()">EXPORTAR A PDF 📄</button>
         <button class="pixel-btn" (click)="exportarExcel()">EXPORTAR A EXCEL 📊</button>
       </div>
 
-      <h2 style="margin-top: 40px;">LOG DE AUDITORÍA</h2>
+      <h2 style="margin-top: 40px;">📽️ PELÍCULAS MÁS VISTAS 📽️</h2>
+      <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
+        <button class="pixel-btn-back" [style.background]="vistaPeriodo() === 'semana' ? '#00f0ff' : 'transparent'" [style.color]="vistaPeriodo() === 'semana' ? '#000' : '#00f0ff'" (click)="cambiarVistaPeriodo('semana')">ESTA SEMANA</button>
+        <button class="pixel-btn-back" [style.background]="vistaPeriodo() === 'mes' ? '#00f0ff' : 'transparent'" [style.color]="vistaPeriodo() === 'mes' ? '#000' : '#00f0ff'" (click)="cambiarVistaPeriodo('mes')">ESTE MES</button>
+      </div>
+
+      @for (fila of peliculasMasVistas(); track fila.nombre) {
+        <div class="barra-fila">
+          <span class="barra-label">{{ fila.nombre }}</span>
+          <div class="barra-track">
+            <div class="barra-fill barra-fill-vip" [style.width.%]="(fila.cantidad / maxPeliculasVistas()) * 100" [title]="fila.cantidad + ' entradas'"></div>
+          </div>
+          <span class="barra-valor">{{ fila.cantidad }}</span>
+        </div>
+      } @empty {
+        <p class="pixel-info">Todavía no se vendieron entradas en este período.</p>
+      }
+
+      <h2 style="margin-top: 40px;">🍿 PRODUCTO MÁS VENDIDO 🍿</h2>
+      @for (fila of candyMasVendido(); track fila.nombre) {
+        <div class="barra-fila">
+          <span class="barra-label">{{ fila.nombre }}</span>
+          <div class="barra-track">
+            <div class="barra-fill barra-fill-candy" [style.width.%]="(fila.cantidad / maxCandyVendido()) * 100" [title]="fila.cantidad + ' vendidos'"></div>
+          </div>
+          <span class="barra-valor">{{ fila.cantidad }}</span>
+        </div>
+      } @empty {
+        <p class="pixel-info">Todavía no se vendieron productos.</p>
+      }
+
+      <h2 style="margin-top: 40px;">🧾 REPORTE DE AUDITORÍA 🧾</h2>
       <p class="pixel-info">Registro de acciones importantes hechas desde este panel (solo lectura).</p>
       @for (log of logsList(); track log.id) {
         <div class="pixel-group" style="border: 2px solid #333; padding: 12px;">

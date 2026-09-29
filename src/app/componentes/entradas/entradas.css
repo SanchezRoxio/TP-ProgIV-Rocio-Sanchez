@@ -1,0 +1,137 @@
+.validar-container {
+  background-color: #0b0b0e;
+  color: #fff;
+  min-height: 100vh;
+  padding: 20px;
+  font-family: 'Press Start 2P', monospace;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pixel-btn-volver {
+  background: transparent;
+  border: 2px solid #00f0ff;
+  color: #00f0ff;
+  font-family: 'Press Start 2P', monospace;
+  padding: 8px 12px;
+  cursor: pointer;
+  align-self: flex-start;
+  margin-bottom: 10px;
+}
+
+.validar-title {
+  color: #ffe600;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.lector-qr {
+  width: 100%;
+  max-width: 320px;
+  min-height: 250px;
+  border: 2px dashed #00f0ff;
+  margin-bottom: 15px;
+}
+
+.pixel-info {
+  font-size: 11px;
+  color: #aaa;
+  text-align: center;
+  max-width: 320px;
+}
+
+.codigo-manual {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+  width: 100%;
+  max-width: 320px;
+  flex-wrap: wrap;
+}
+
+.pixel-input {
+  background-color: #111;
+  border: 2px solid #fff;
+  color: #fff;
+  font-family: 'Press Start 2P', monospace;
+  padding: 8px;
+  flex: 1;
+  min-width: 140px;
+  box-sizing: border-box;
+}
+
+.pixel-btn {
+  background: #00ff66;
+  border: 2px solid #fff;
+  color: #000;
+  font-family: 'Press Start 2P', monospace;
+  padding: 10px 14px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0px #ff0055;
+}
+
+.pixel-btn:disabled {
+  background: #333;
+  color: #888;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.pixel-btn-back {
+  background: transparent;
+  border: 2px solid #ff0055;
+  color: #ff0055;
+  font-family: 'Press Start 2P', monospace;
+  padding: 8px 12px;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+.alert-error {
+  background: #ff0055;
+  color: #fff;
+  padding: 10px;
+  margin: 10px 0;
+  max-width: 320px;
+  text-align: center;
+  font-size: 11px;
+}
+
+.alert-success {
+  background: #00ff66;
+  color: #000;
+  padding: 10px;
+  margin: 10px 0;
+  max-width: 320px;
+  text-align: center;
+  font-size: 11px;
+}
+
+.entrada-encontrada {
+  background: #15151c;
+  border: 3px solid #ff0055;
+  padding: 20px;
+  margin-top: 15px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 6px 6px 0px #ff0055;
+}
+
+.entrada-encontrada h3 {
+  color: #00ffcc;
+  margin-top: 0;
+}
+
+.entrada-encontrada p {
+  font-size: 11px;
+  color: #fff;
+  line-height: 1.6;
+}
+
+.botones-accion {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+}

@@ -43,7 +43,7 @@
 
       <div class="item-detalle" *ngIf="usarCredito">
         <span>Crédito a favor aplicado:</span>
-        <span class="descuento">- $ {{ creditoDisponible }}</span>
+        <span class="descuento">- $ {{ calcularCreditoUsado() }}</span>
       </div>
 
       <div class="total-box">

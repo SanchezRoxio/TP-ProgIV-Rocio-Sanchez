@@ -38,11 +38,25 @@
   background: #15151c;
   border: 3px solid #ff0055;
   padding: 15px;
-  width: 200px;
+  width: 100%;
+  max-width: 200px;
   display: flex;
   flex-direction: column;
   align-items: center;
   box-shadow: 4px 4px 0px #ff0055;
+  box-sizing: border-box;
+}
+
+@media (max-width: 500px) {
+  .candy-container {
+    padding: 12px;
+  }
+
+  .botones-accion {
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+  }
 }
 
 .prod-name {

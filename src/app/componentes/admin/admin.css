@@ -79,6 +79,52 @@
 
 /* fila de un listado (pelicula/sala/candy cargado): titulo a la izquierda,
    botones de editar/borrar a la derecha, en vez de uno abajo del otro */
+/* graficos de barras horizontales de la seccion de reportes */
+
+.barra-fila {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.barra-label {
+  width: 160px;
+  flex-shrink: 0;
+  color: #00ffcc;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.barra-track {
+  flex: 1;
+  background: #000;
+  border: 2px solid #333;
+  height: 18px;
+}
+
+.barra-fill {
+  height: 100%;
+  background: #00f0ff;
+  min-width: 2px;
+}
+
+.barra-fill-vip {
+  background: #ffe600;
+}
+
+.barra-fill-candy {
+  background: #ff0055;
+}
+
+.barra-valor {
+  width: 110px;
+  flex-shrink: 0;
+  text-align: right;
+  color: #fff;
+}
+
 .admin-list-item {
   display: flex;
   flex-direction: row;
@@ -168,8 +214,40 @@ textarea.pixel-input {
 }
 
 .pixel-info {
-  font-size: 14px;
   color: #ccc;
   line-height: 1.6;
 }
 
+@media (max-width: 600px) {
+  .pixel-admin-container {
+    padding: 20px 10px;
+  }
+
+  .admin-section {
+    padding: 15px;
+  }
+
+  .admin-section h2 {
+    font-size: 14px;
+  }
+
+  .pixel-tab-btn {
+    font-size: 9px;
+    padding: 8px 10px;
+  }
+
+  /* con tan poco ancho, el grafico de barras (label+track+valor en una sola
+     fila) queda aplastado: lo apilo en 2 lineas en vez de 3 columnas */
+  .barra-fila {
+    flex-wrap: wrap;
+  }
+
+  .barra-label {
+    width: 100%;
+    white-space: normal;
+  }
+
+  .barra-valor {
+    width: auto;
+  }
+}

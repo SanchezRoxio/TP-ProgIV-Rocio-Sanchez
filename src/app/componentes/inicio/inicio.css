@@ -42,7 +42,8 @@
   border: 4px solid #fff;
   box-shadow: 8px 8px 0px #ff0055;
   padding: 25px;
-  width: 300px;
+  width: 100%;
+  max-width: 300px;
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -109,9 +110,11 @@
   color: #00ffcc;
   font-family: 'Press Start 2P', monospace;
   padding: 12px;
-  width: 350px;
+  width: 100%;
+  max-width: 350px;
   outline: none;
   box-shadow: 4px 4px 0px #ff0055;
+  box-sizing: border-box;
 }
 
 .pixel-input:focus {
@@ -206,9 +209,40 @@
 
 .peli-poster {
   width: 100%;
-  height: 350px;          
-  object-fit: cover;     
+  height: 350px;
+  object-fit: cover;
   border: 2px solid #fff;
   box-sizing: border-box;
   margin-bottom: 10px;
+}
+
+/* celulares: achico paddings, saco el hack de margin-right del titulo (con
+   flex-wrap ya se acomoda solo), y bajo un poco las tipografias grandes */
+@media (max-width: 600px) {
+  .pixel-inicio-container {
+    padding: 20px 12px;
+  }
+
+  .header-top-bar {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .main-title {
+    font-size: 16px;
+    margin-right: 0;
+    letter-spacing: 1px;
+  }
+
+  .pixel-card {
+    padding: 15px;
+  }
+
+  .peli-poster {
+    height: 220px;
+  }
+
+  .top-grid, .catalogo-grid {
+    gap: 15px;
+  }
 }

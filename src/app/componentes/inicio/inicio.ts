@@ -26,7 +26,7 @@ export class InicioComponent implements OnInit {
 
   // Filtros
   filtroBusqueda = signal<string>('');
-  generosSeleccionados = signal<string[]>([]); // vacío = "todos", sin filtro de género aplicado
+  generosSeleccionados = signal<string[]>([]); // vacío = "todos", sin filtro de genero aplicado
   misAlertas = signal<number[]>([]);
 
 
@@ -45,7 +45,7 @@ export class InicioComponent implements OnInit {
   }
 
   async ngOnInit() {
-    // cargar las películas desde la db
+    // cargar las peliculas desde la db
     await this.cargarPeliculasDesdeDB();
   }
 
@@ -58,7 +58,7 @@ export class InicioComponent implements OnInit {
     }
   }
 
-  // Cuántos días faltan para el estreno (negativo si ya pasó)
+  // cntos dias faltan para el estreno (negativo si ya paso)
   private diasHastaEstreno(fechaEstreno: string): number {
     const hoy = new Date();
     const estreno = new Date(fechaEstreno);

@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth-guard';
 import { adminGuard } from './guards/admin-guard';
+import { empleadoGuard } from './guards/empleado-guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'inicio', pathMatch: 'full' },
@@ -43,6 +44,11 @@ export const routes: Routes = [
     path: 'admin',
     loadComponent: () => import('./componentes/admin/admin').then(m => m.AdminComponent),
     canMatch: [adminGuard] // <--- (¡ADMIN!)
+  },
+  {
+    path: 'validar',
+    loadComponent: () => import('./componentes/entradas/entradas').then(m => m.EntradasComponent),
+    canMatch: [empleadoGuard]
   },
   {
     path: '**',

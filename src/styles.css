@@ -4,3 +4,11 @@ body {
   height: 100vh;
   background-color: #0b0b0e !important;
 }
+
+/* red de seguridad para que ningun elemento suelto rompa el ancho de la
+   pagina en celular (el mapa de butacas tiene su propio scroll horizontal
+   interno aparte, asi que esto no lo afecta) */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}

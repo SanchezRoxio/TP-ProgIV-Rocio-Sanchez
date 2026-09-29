@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { generarEntradaPDF } from '../../utilidades/generar-entrada-pdf';
 
 @Component({
   selector: 'app-pago',
@@ -23,10 +24,15 @@ export class PagoComponent implements OnInit {
   codigoCupon: string = '';
   descuentoAplicado: number = 0;
   usarCredito: boolean = false;
-  creditoDisponible: number = 2500;
+  creditoDisponible: number = 0;
   procesando = false;
 
   ngOnInit() {
+    // el credito sale de una cancelacion anterior (o 0 si nunca cancelaste
+    // nada, o si sos invitado sin cuenta)
+    const usuario = this.authService.usuarioActual();
+    this.creditoDisponible = usuario?.credito ?? 0;
+
     const navigation = history.state;
     if (navigation && navigation.seleccion) {
       this.seleccion = navigation.seleccion;
@@ -65,12 +71,18 @@ export class PagoComponent implements OnInit {
     return this.combosSeleccionados.reduce((acc, c) => acc + (c.precio * c.cantidad), 0);
   }
 
+  // no uso todo el credito disponible siempre, solo lo que haga falta para
+  // llegar a $0 (si tenés $5000 de credito y la compra sale $3000, te quedan
+  // $2000 de credito para la próxima, no se pierden)
+  calcularCreditoUsado(): number {
+    if (!this.usarCredito) return 0;
+    const totalSinCredito = Math.max(0, (this.subtotalEntradas + this.getSubtotalCandy() + this.getSubtotalCombos()) - this.descuentoAplicado);
+    return Math.min(this.creditoDisponible, totalSinCredito);
+  }
+
   calcularTotal(): number {
-    let total = (this.subtotalEntradas + this.getSubtotalCandy() + this.getSubtotalCombos()) - this.descuentoAplicado;
-    if (this.usarCredito) {
-      total = Math.max(0, total - this.creditoDisponible);
-    }
-    return total;
+    const totalSinCredito = (this.subtotalEntradas + this.getSubtotalCandy() + this.getSubtotalCombos()) - this.descuentoAplicado;
+    return Math.max(0, totalSinCredito - this.calcularCreditoUsado());
   }
 
   mensajeExito = signal<string | null>(null);
@@ -114,10 +126,11 @@ export class PagoComponent implements OnInit {
     try {
       const usuario = this.authService.usuarioActual();
 
-      await this.authService.finalizarCompra({
+      const entrada = await this.authService.finalizarCompra({
         usuarioId: usuario ? usuario.id : null,
         funcionId: this.seleccion.funcionId,
         total: this.calcularTotal(),
+        creditoUsado: this.calcularCreditoUsado(),
         // a las primeras N butacas (cubiertas por combo) las mando con precio 0,
         // porque lo que costaron ya está incluido en el precio fijo del combo
         // (ese precio se registra aparte, en la fila de entrada_combos)
@@ -136,6 +149,17 @@ export class PagoComponent implements OnInit {
           precioUnitario: c.precio
         }))
       });
+
+      // ya se guardó la compra en la base, ahora armo el pdf con el QR para
+      // que se descargue solo, tal como pide la consigna. Si esto fallara por
+      // algún motivo, no quiero que tape el hecho de que la compra sí se hizo,
+      // por eso va en su propio try/catch en vez de arriesgar el mensaje de éxito
+      try {
+        const datosTicket = await this.authService.obtenerDatosTicket(entrada.id);
+        await generarEntradaPDF(datosTicket);
+      } catch (errorPdf) {
+        console.error('No se pudo generar el PDF de la entrada:', errorPdf);
+      }
 
       if (usuario) {
         this.router.navigate(['/perfil']);

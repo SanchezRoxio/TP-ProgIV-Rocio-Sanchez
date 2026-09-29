@@ -1,0 +1,61 @@
+<div class="validar-container">
+  <button class="pixel-btn-volver" routerLink="/inicio">← VOLVER</button>
+  <h2 class="validar-title">🎫 VALIDAR ENTRADA</h2>
+
+  <div id="lector-qr" class="lector-qr"></div>
+  <p class="pixel-info">Apuntá la cámara al QR de la entrada, o escribí el código a mano:</p>
+
+  <div class="codigo-manual">
+    <input
+      type="text"
+      [(ngModel)]="codigoManual"
+      placeholder="ENTRADA-123"
+      class="pixel-input"
+      (keyup.enter)="buscarCodigoManual()"
+    />
+    <button class="pixel-btn" (click)="buscarCodigoManual()">BUSCAR</button>
+  </div>
+
+  @if (mensajeError()) {
+    <div class="alert-error">{{ mensajeError() }}</div>
+  }
+  @if (mensajeExito()) {
+    <div class="alert-success">{{ mensajeExito() }}</div>
+  }
+
+  @if (entrada()) {
+    <div class="entrada-encontrada">
+      <h3>{{ entrada().funciones?.peliculas?.titulo }}</h3>
+      <p>{{ entrada().funciones?.dia }} — {{ entrada().funciones?.horario }}</p>
+      <p>Comprador: {{ entrada().usuarios?.nombre || 'Invitado' }} {{ entrada().usuarios?.apellido || '' }}</p>
+      <p>
+        Butacas:
+        @for (eb of entrada().entrada_butacas; track eb; let ultimo = $last) {
+          {{ eb.butacas.fila }}-{{ eb.butacas.numero }}@if (!ultimo) {, }
+        }
+      </p>
+
+      @if (tieneCandyOCombos()) {
+        <p>
+          Candy:
+          @for (c of entrada().entrada_candy; track c) { {{ c.cantidad }}x {{ c.candy.nombre }} }
+          @for (c of entrada().entrada_combos; track c) { {{ c.cantidad }}x {{ c.combos.nombre }} }
+        </p>
+      }
+
+      <div class="botones-accion">
+        <button class="pixel-btn" [disabled]="entrada().validada" (click)="validarEntrada()">
+          {{ entrada().validada ? '✔️ YA VALIDADA' : 'VALIDAR ENTRADA' }}
+        </button>
+
+        @if (tieneCandyOCombos()) {
+          <button class="pixel-btn" [disabled]="entrada().candy_entregado" (click)="entregarCandy()">
+            {{ entrada().candy_entregado ? '✔️ CANDY ENTREGADO' : 'ENTREGAR CANDY' }}
+          </button>
+        }
+      </div>
+
+      <button class="pixel-btn-back" (click)="limpiar()">BUSCAR OTRA</button>
+    </div>
+  }
+</div>

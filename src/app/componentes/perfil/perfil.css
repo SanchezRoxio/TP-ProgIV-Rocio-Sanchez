@@ -118,3 +118,34 @@
   color: #666;
   margin: 4px 0;
 }
+
+.pixel-btn-descargar {
+  background: transparent;
+  border: 1px solid #00f0ff;
+  color: #00f0ff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  padding: 6px;
+  margin-top: 8px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.pixel-btn-descargar:hover {
+  background: #00f0ff;
+  color: #000;
+}
+
+@media (max-width: 500px) {
+  .perfil-container {
+    padding: 12px;
+  }
+
+  .perfil-card {
+    padding: 15px;
+  }
+
+  .mis-peliculas-grid {
+    justify-content: center;
+  }
+}
