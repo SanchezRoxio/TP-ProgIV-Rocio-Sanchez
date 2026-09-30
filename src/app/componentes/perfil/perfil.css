@@ -136,6 +136,17 @@
   color: #000;
 }
 
+.pixel-btn-descargar:disabled {
+  border-color: #444;
+  color: #444;
+  cursor: not-allowed;
+}
+
+.pixel-btn-descargar:disabled:hover {
+  background: transparent;
+  color: #444;
+}
+
 @media (max-width: 500px) {
   .perfil-container {
     padding: 12px;

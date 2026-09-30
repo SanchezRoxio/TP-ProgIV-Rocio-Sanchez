@@ -27,8 +27,12 @@ export class InicioComponent implements OnInit {
   // Filtros
   filtroBusqueda = signal<string>('');
   generosSeleccionados = signal<string[]>([]); // vacío = "todos", sin filtro de genero aplicado
-  misAlertas = signal<number[]>([]);
+  misAlertas = signal<any[]>([]); // filas {pelicula_id, notificada}
 
+  // peliculas por las que hay que avisarle AHORA al usuario (ya salieron de
+  // "proximamente" y todavia no se le mostró el aviso). Se van sacando de acá
+  // a medida que las cierra
+  avisosPendientes = signal<any[]>([]);
 
   constructor() {
   effect(() => {
@@ -36,7 +40,10 @@ export class InicioComponent implements OnInit {
     if (usuario) {
       this.usuarioLogueado.set(true);
       this.nombreUsuario.set(usuario.nombre || usuario.email.split('@')[0].toUpperCase());
-      this.authService.obtenerMisAlertas(usuario.id).then(ids => this.misAlertas.set(ids));
+      // la carga de alertas + la revision de avisos se hacen juntas, desde
+      // ngOnInit, para asegurarme de que las peliculas ya esten cargadas
+      // antes de comparar (sino, revisarAvisosPendientes compara contra una
+      // lista vacia y no encuentra nada)
     } else {
       this.usuarioLogueado.set(false);
       this.misAlertas.set([]);
@@ -45,8 +52,45 @@ export class InicioComponent implements OnInit {
   }
 
   async ngOnInit() {
-    // cargar las peliculas desde la db
     await this.cargarPeliculasDesdeDB();
+
+    const usuario = this.authService.usuarioActual();
+    if (usuario) {
+      const alertas = await this.authService.obtenerMisAlertas(usuario.id);
+      this.misAlertas.set(alertas);
+      this.revisarAvisosPendientes(usuario.id);
+    }
+  }
+
+  // como no tenemos backend propio, no hay forma de avisarle al usuario si no
+  // tiene la app abierta (eso necesitaría un servidor que mande push). Lo que
+  // sí podemos hacer es, cada vez que entra, fijarnos si alguna película de
+  // sus alertas ya salió de "próximamente" y todavía no se lo avisamos
+  private revisarAvisosPendientes(usuarioId: string) {
+    const idsConAlerta = new Map(this.misAlertas().map(a => [a.pelicula_id, a.notificada]));
+    const idsEnCartelera = new Set(this.peliculasCartelera().map(p => p.id));
+
+    const pendientes = this.peliculas().filter(p =>
+      idsConAlerta.has(p.id) && !idsConAlerta.get(p.id) && idsEnCartelera.has(p.id)
+    );
+
+    if (pendientes.length === 0) return;
+
+    this.avisosPendientes.set(pendientes);
+
+    // si el usuario dio permiso antes, además de el cartel en pantalla le
+    // mandamos una notificación real del navegador
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      pendientes.forEach(p => {
+        new Notification('🎬 RoxiMovie', { body: `¡Ya podés comprar entradas para "${p.titulo}"!` });
+      });
+    }
+
+    pendientes.forEach(p => this.authService.marcarAlertaNotificada(usuarioId, p.id));
+  }
+
+  cerrarAviso(peliculaId: number) {
+    this.avisosPendientes.update(lista => lista.filter(p => p.id !== peliculaId));
   }
 
   async cargarPeliculasDesdeDB() {
@@ -99,14 +143,25 @@ export class InicioComponent implements OnInit {
     });
   }
 
+  tieneAlertaActiva(peliculaId: number): boolean {
+    return this.misAlertas().some(a => a.pelicula_id === peliculaId);
+  }
+
   async activarAlerta(peliculaId: number) {
   const usuario = this.authService.usuarioActual();
   if (!usuario) {
     this.router.navigate(['/login']);
     return;
   }
+
+  // este es el momento natural para pedir el permiso: recien cuando el
+  // usuario activamente pide que le avisen, no apenas entra a la pagina
+  if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+
   await this.authService.activarAlertaEstreno(usuario.id, peliculaId);
-  this.misAlertas.update(ids => [...ids, peliculaId]);
+  this.misAlertas.update(alertas => [...alertas, { pelicula_id: peliculaId, notificada: false }]);
   }
 
   verDetalle(id: number) {

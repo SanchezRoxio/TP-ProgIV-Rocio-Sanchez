@@ -21,7 +21,7 @@
 
       <div class="fidelizacion-box">
         <span class="puntos-badge">⭐ PUNTOS ROXI'S CLUB: {{ puntos() }} PTS</span>
-        <p class="puntos-desc">¡Canjeá tus puntos por un combo de pochoclos gratis en el Candy Bar!</p>
+        <p class="puntos-desc">Ganás 1 punto por cada peso gastado. Canjealos más abajo por crédito para tu próxima compra.</p>
       </div>
 
       @if (credito() > 0) {
@@ -29,6 +29,37 @@
           <span class="puntos-badge" style="color: #00ff66;">💵 CRÉDITO DISPONIBLE: ${{ credito() }}</span>
           <p class="puntos-desc">Lo podés usar en tu próxima compra, junto con otros métodos de pago.</p>
         </div>
+      }
+    </div>
+
+    <div class="historial-section">
+      <h3 class="section-title">🎁 CANJEAR PUNTOS</h3>
+      @if (mensajeCanje()) {
+        <p style="color: #ffe600; font-size: 12px;">{{ mensajeCanje() }}</p>
+      }
+
+      <div class="mis-peliculas-grid">
+        @for (recompensa of recompensasActivas(); track recompensa.id) {
+          <div class="mini-poster-card">
+            <h4 class="mini-poster-title">{{ recompensa.nombre }}</h4>
+            <p class="mini-poster-fecha">{{ recompensa.puntos_costo }} PTS</p>
+            <p class="mini-poster-sin-calificar">= ${{ recompensa.valor_monetario }} de crédito</p>
+            <button class="pixel-btn-descargar" [disabled]="!puedeCanjear(recompensa)" (click)="canjear(recompensa)">
+              {{ puedeCanjear(recompensa) ? '🎁 CANJEAR' : 'TE FALTAN PUNTOS' }}
+            </button>
+          </div>
+        } @empty {
+          <p style="color: #888; font-size: 15px;">Todavía no hay recompensas cargadas.</p>
+        }
+      </div>
+
+      @if (misCanjes().length > 0) {
+        <h3 class="section-title" style="margin-top: 20px;">📜 HISTORIAL DE CANJES</h3>
+        @for (canje of misCanjes(); track canje.id) {
+          <p class="mini-poster-fecha" style="text-align: left;">
+            {{ canje.created_at | date:'dd/MM/yyyy' }} — {{ canje.recompensas?.nombre ?? 'Recompensa eliminada' }} (-{{ canje.puntos_gastados }} pts)
+          </p>
+        }
       }
     </div>
 

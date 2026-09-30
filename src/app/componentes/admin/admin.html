@@ -11,6 +11,7 @@
     <button class="pixel-tab-btn" (click)="cambiarSeccion('combos')">COMBOS</button>
     <button class="pixel-tab-btn" (click)="cambiarSeccion('cupones')">CUPONES</button>
     <button class="pixel-tab-btn" (click)="cambiarSeccion('empleados')">EMPLEADOS</button>
+    <button class="pixel-tab-btn" (click)="cambiarSeccion('recompensas')">RECOMPENSAS</button>
     <button class="pixel-tab-btn" (click)="cambiarSeccion('reportes')">REPORTES & LOGS</button>
   </div>
 
@@ -199,7 +200,7 @@
   @if (seccionActiva() === 'salas') {
     <section class="admin-section">
       <h2>GESTIÓN DE SALAS</h2>
-      <p class="pixel-info">Al crear una sala, las butacas se generan automáticamente con la distribución estándar del cine.</p>
+      <p class="pixel-info">Al crear una sala, las butacas se generan automáticamente.</p>
       <form [formGroup]="salaForm" (ngSubmit)="guardarSala()" class="pixel-form">
         <div class="pixel-group">
           <label>NOMBRE DE LA SALA:</label>
@@ -290,7 +291,7 @@
   @if (seccionActiva() === 'combos') {
     <section class="admin-section">
       <h2>GESTIÓN DE COMBOS</h2>
-      <p class="pixel-info">Elegí un nombre, un precio fijo, y cuánto de cada producto va incluido (dejá en 0 los que no formen parte del combo).</p>
+      <p class="pixel-info">Elegí un nombre, un precio fijo, y cuánto de cada producto va incluido (se deja en 0 los que no formen parte del combo).</p>
 
       <form [formGroup]="comboForm" (ngSubmit)="guardarCombo()" class="pixel-form">
         <div class="pixel-group">
@@ -360,7 +361,7 @@
   @if (seccionActiva() === 'cupones') {
     <section class="admin-section">
       <h2>GESTIÓN DE CUPONES</h2>
-      <p class="pixel-info">El código se guarda en mayúsculas. Si dejás la fecha de vencimiento vacía, el cupón no vence nunca.</p>
+      <p class="pixel-info">El código se guarda en mayúsculas. Si se deja la fecha de vencimiento vacía, el cupón no vence nunca.</p>
 
       <form [formGroup]="cuponForm" (ngSubmit)="guardarCupon()" class="pixel-form">
         <div class="pixel-group">
@@ -400,8 +401,8 @@
           <span>
             {{ cupon.codigo }} — {{ cupon.descuento_porcentaje }}%
             @if (cupon.fecha_vencimiento) { (vence {{ cupon.fecha_vencimiento | date:'dd/MM/yyyy'}})}
-            @if (cupon.solo_mayores_50) {<span style="color: #ffe600;">(solo +50 años)</span> }
-            @if (cupon.solo_primera_compra) { <span style="color: #ffe600;">(solo 1ra compra)</span> }
+            @if (cupon.solo_mayores_50) {<span style="color: #ffe600;">(+50 años)</span> }
+            @if (cupon.solo_primera_compra) { <span style="color: #ffe600;">(1ra compra)</span> }
             <span [style.color]="cupon.activo ? '#00ff66' : '#ff0055'"> {{ cupon.activo ? 'ACTIVO' : 'INACTIVO' }}</span>
           </span>
           @if (confirmandoBorrarCuponId() === cupon.id) {
@@ -428,7 +429,7 @@
   @if (seccionActiva() === 'empleados') {
     <section class="admin-section">
       <h2>GESTIÓN DE EMPLEADOS</h2>
-      <p class="pixel-info">Los empleados y los admins pueden entrar a "/validar" para escanear o tipear el código de una entrada. Para hacer empleado a alguien, esa persona tiene que estar registrada primero.</p>
+      <p class="pixel-info">Los empleados/admins/gerentes pueden entrar a escanear o tipear el código de una entrada. Para hacer empleado a alguien, esa persona tiene que estar registrada primero.</p>
 
       <div class="pixel-form">
         <div class="pixel-group">
@@ -457,11 +458,64 @@
     </section>
   }
 
+  <!-- SECCIÓN RECOMPENSAS -->
+  @if (seccionActiva() === 'recompensas') {
+    <section class="admin-section">
+      <h2>GESTIÓN DE RECOMPENSAS</h2>
+      <p class="pixel-info">Los usuarios ganan 1 punto por cada peso gastado. Al canjear una recompensa, se les descuentan los puntos y se les suma el valor en pesos como crédito para su próxima compra.</p>
+
+      <form [formGroup]="recompensaForm" (ngSubmit)="guardarRecompensa()" class="pixel-form">
+        <div class="pixel-group">
+          <label>NOMBRE:</label>
+          <input type="text" formControlName="nombre" placeholder="Entrada gratis" class="pixel-input" />
+        </div>
+        <div class="pixel-group">
+          <label>PUNTOS QUE CUESTA:</label>
+          <input type="number" formControlName="puntos_costo" min="1" class="pixel-input" />
+        </div>
+        <div class="pixel-group">
+          <label>VALOR EN CRÉDITO ($):</label>
+          <input type="number" formControlName="valor_monetario" min="1" class="pixel-input" />
+        </div>
+
+        <button type="submit" class="pixel-btn">{{ editandoRecompensaId() ? 'GUARDAR CAMBIOS' : 'CREAR RECOMPENSA' }}</button>
+        @if (editandoRecompensaId()) {
+          <button type="button" class="pixel-btn-back" (click)="cancelarEdicionRecompensa()">CANCELAR EDICIÓN</button>
+        }
+      </form>
+
+      <h2 style="margin-top: 40px;">RECOMPENSAS CARGADAS</h2>
+      @for (recompensa of recompensasList(); track recompensa.id) {
+        <div class="admin-list-item">
+          <span>
+            {{ recompensa.nombre }} — {{ recompensa.puntos_costo }} pts = ${{ recompensa.valor_monetario }}
+            <span [style.color]="recompensa.activo ? '#00ff66' : '#ff0055'">{{ recompensa.activo ? 'ACTIVA' : 'INACTIVA' }}</span>
+          </span>
+          @if (confirmandoBorrarRecompensaId() === recompensa.id) {
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span style="color: #ff0055;">¿Borrar esta recompensa?</span>
+              <button type="button" class="pixel-btn-back" (click)="borrarRecompensa(recompensa.id)">SÍ, BORRAR</button>
+              <button type="button" class="pixel-btn-back" (click)="cancelarBorrarRecompensa()">CANCELAR</button>
+            </div>
+          } @else {
+            <div style="display: flex; gap: 10px;">
+              <button type="button" class="pixel-btn-back" (click)="editarRecompensa(recompensa)">EDITAR</button>
+              <button type="button" class="pixel-btn-back" (click)="toggleActivoRecompensa(recompensa)">{{ recompensa.activo ? 'DESACTIVAR' : 'ACTIVAR' }}</button>
+              <button type="button" class="pixel-btn-back" (click)="pedirConfirmacionBorrarRecompensa(recompensa.id)">BORRAR</button>
+            </div>
+          }
+        </div>
+      } @empty {
+        <p class="pixel-info">No hay recompensas cargadas todavía.</p>
+      }
+    </section>
+  }
+
   <!-- SECCIÓN REPORTES -->
   @if (seccionActiva() === 'reportes') {
     <section class="admin-section">
       <h2>💰 FACTURACIÓN POR DÍA 💰</h2>
-      <p class="pixel-info">Cuánto se facturó y cuántas entradas se vendieron cada día (no cuenta lo cancelado, esa plata quedó como crédito).</p>
+      <p class="pixel-info">Cuánto se facturó y cuántas entradas se vendieron cada día (lo cancelado queda como crédito).</p>
 
       @for (fila of facturacionPorDia(); track fila.dia) {
         <div class="barra-fila">
@@ -512,7 +566,7 @@
       }
 
       <h2 style="margin-top: 40px;">🧾 REPORTE DE AUDITORÍA 🧾</h2>
-      <p class="pixel-info">Registro de acciones importantes hechas desde este panel (solo lectura).</p>
+      <p class="pixel-info">Registro de acciones importantes hechas desde este panel.</p>
       @for (log of logsList(); track log.id) {
         <div class="pixel-group" style="border: 2px solid #333; padding: 12px;">
           <span>{{ log.accion }}</span>

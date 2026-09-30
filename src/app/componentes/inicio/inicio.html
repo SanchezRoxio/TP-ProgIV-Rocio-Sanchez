@@ -16,7 +16,15 @@
       }
     </div>
   </header>
-  
+
+  <!-- avisos de "ya podés comprar" para las peliculas que el usuario siguió -->
+  @for (peli of avisosPendientes(); track peli.id) {
+    <div class="aviso-estreno">
+      <span>🔔 ¡Ya podés comprar entradas para "{{ peli.titulo }}"!</span>
+      <button class="pixel-btn-cerrar-aviso" (click)="cerrarAviso(peli.id)">✕</button>
+    </div>
+  }
+
   <!-- Top de las pelis-->
   <section class="top-section">
     <h2 class="section-subtitle">⭐ TOP 3 ⭐</h2>
@@ -103,7 +111,7 @@
             }
             <h3 class="peli-title">{{ peli.titulo }}</h3>
             <p class="peli-info">Estreno: {{ peli.fecha_estreno }}</p>
-            @if (misAlertas().includes(peli.id)) {
+            @if (tieneAlertaActiva(peli.id)) {
               <button class="pixel-btn" disabled>✓ TE AVISAREMOS</button>
             } @else {
               <button class="pixel-btn" (click)="activarAlerta(peli.id)">🔔 AVISARME</button>

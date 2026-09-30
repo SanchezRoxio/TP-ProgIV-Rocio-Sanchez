@@ -345,9 +345,13 @@ async finalizarCompra(datos: {
   candy: { candyId: number; cantidad: number; precioUnitario: number }[];
   combos: { comboId: number; cantidad: number; precioUnitario: number }[];
 }) {
+  // 1 punto por cada $ gastado (sobre lo que realmente termina pagando,
+  // ya con descuentos/credito aplicados). Los invitados no acumulan.
+  const puntosGanados = datos.usuarioId ? Math.floor(datos.total) : 0;
+
   const { data: entradaData, error: errorEntrada } = await this.supabase
     .from('entradas')
-    .insert([{ usuario_id: datos.usuarioId, funcion_id: datos.funcionId, total: datos.total }])
+    .insert([{ usuario_id: datos.usuarioId, funcion_id: datos.funcionId, total: datos.total, puntos_otorgados: puntosGanados }])
     .select();
   if (errorEntrada) throw errorEntrada;
 
@@ -384,11 +388,13 @@ async finalizarCompra(datos: {
     if (errorCombos) throw errorCombos;
   }
 
-  // si uso credito (por una cancelacion anterior), se lo descuento de su saldo
-  if (datos.usuarioId && datos.creditoUsado > 0) {
-    const { data: usuario } = await this.supabase.from('usuarios').select('credito').eq('id', datos.usuarioId).single();
+  // si uso credito (por una cancelacion anterior) y/o gano puntos nuevos,
+  // actualizo el perfil del usuario con los dos cambios juntos
+  if (datos.usuarioId && (datos.creditoUsado > 0 || puntosGanados > 0)) {
+    const { data: usuario } = await this.supabase.from('usuarios').select('credito, puntos').eq('id', datos.usuarioId).single();
     const creditoRestante = Math.max(0, (usuario?.credito ?? 0) - datos.creditoUsado);
-    await this.supabase.from('usuarios').update({ credito: creditoRestante }).eq('id', datos.usuarioId);
+    const puntosNuevos = (usuario?.puntos ?? 0) + puntosGanados;
+    await this.supabase.from('usuarios').update({ credito: creditoRestante, puntos: puntosNuevos }).eq('id', datos.usuarioId);
   }
 
   return entrada;
@@ -401,7 +407,7 @@ async finalizarCompra(datos: {
 async cancelarCompra(entradaId: number, usuarioId: string) {
   const { data: entrada, error: errorEntrada } = await this.supabase
     .from('entradas')
-    .select('total, estado, usuario_id, funciones ( dia, horario )')
+    .select('total, estado, usuario_id, puntos_otorgados, funciones ( dia, horario )')
     .eq('id', entradaId)
     .single();
   if (errorEntrada) throw errorEntrada;
@@ -420,14 +426,17 @@ async cancelarCompra(entradaId: number, usuarioId: string) {
   // libero las butacas que había ocupado, para que se puedan volver a vender
   await this.supabase.from('entrada_butacas').delete().eq('entrada_id', entradaId);
 
-  const { data: usuario, error: errorUsuario } = await this.supabase.from('usuarios').select('credito').eq('id', usuarioId).single();
+  const { data: usuario, error: errorUsuario } = await this.supabase.from('usuarios').select('credito, puntos').eq('id', usuarioId).single();
   if (errorUsuario) throw errorUsuario;
 
+  // le doy credito por lo que pagó, y le saco los puntos que había ganado con
+  // esta compra (si no, podría cancelar y quedarse con puntos "de la nada")
   const creditoNuevo = (usuario?.credito ?? 0) + entrada.total;
-  const { error: errorCredito } = await this.supabase.from('usuarios').update({ credito: creditoNuevo }).eq('id', usuarioId);
+  const puntosNuevos = Math.max(0, (usuario?.puntos ?? 0) - (entrada.puntos_otorgados ?? 0));
+  const { error: errorCredito } = await this.supabase.from('usuarios').update({ credito: creditoNuevo, puntos: puntosNuevos }).eq('id', usuarioId);
   if (errorCredito) throw errorCredito;
 
-  return creditoNuevo;
+  return { credito: creditoNuevo, puntos: puntosNuevos };
 }
 
 suscribirseAButacas(funcionId: number, onCambio: (butacaId: number) => void) {
@@ -690,13 +699,26 @@ async activarAlertaEstreno(usuarioId: string, peliculaId: number) {
   if (error && error.code !== '23505') throw error; //codigo que usa Postgres para "violacion de restriccion unica"
 }
 
+// devuelvo la fila completa (no solo el id) para poder saber tambien cuales
+// ya se le avisaron al usuario y cuales todavia no
 async obtenerMisAlertas(usuarioId: string) {
   const { data, error } = await this.supabase
     .from('alertas_estreno')
-    .select('pelicula_id')
+    .select('pelicula_id, notificada')
     .eq('usuario_id', usuarioId);
   if (error) throw error;
-  return (data || []).map((d: any) => d.pelicula_id);
+  return data || [];
+}
+
+// se marca una vez que ya se le mostró el aviso al usuario, para no
+// repetirle la misma notificacion cada vez que entra a la pagina
+async marcarAlertaNotificada(usuarioId: string, peliculaId: number) {
+  const { error } = await this.supabase
+    .from('alertas_estreno')
+    .update({ notificada: true })
+    .eq('usuario_id', usuarioId)
+    .eq('pelicula_id', peliculaId);
+  if (error) throw error;
 }
 
 // CUPONES
@@ -789,6 +811,92 @@ async obtenerCuponBienvenida() {
     .maybeSingle();
   if (error) throw error;
   return data;
+}
+
+// PUNTOS DE FIDELIZACION
+
+async crearRecompensa(datos: { nombre: string; puntos_costo: number; valor_monetario: number }) {
+  const { error } = await this.supabase.from('recompensas').insert([datos]);
+  if (error) throw error;
+}
+
+async obtenerRecompensas() {
+  const { data, error } = await this.supabase
+    .from('recompensas')
+    .select('*')
+    .order('puntos_costo', { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
+
+// para el listado que le mostramos al usuario en su perfil, solo las activas
+async obtenerRecompensasActivas() {
+  const { data, error } = await this.supabase
+    .from('recompensas')
+    .select('*')
+    .eq('activo', true)
+    .order('puntos_costo', { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
+
+async actualizarRecompensa(id: number, datos: { nombre: string; puntos_costo: number; valor_monetario: number; activo: boolean }) {
+  const { error } = await this.supabase.from('recompensas').update(datos).eq('id', id);
+  if (error) throw error;
+}
+
+async eliminarRecompensa(id: number) {
+  const { error } = await this.supabase.from('recompensas').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// canjear una recompensa le resta los puntos y le suma credito por el valor de la recompensa (en vez de armar un sistema de "vales" aparte, reuso el
+// mismo credito que ya usamos para las cancelaciones: es plata a favor para la proxima compra en los dos casos)
+async canjearRecompensa(usuarioId: string, recompensaId: number) {
+  const { data: recompensa, error: errorRecompensa } = await this.supabase
+    .from('recompensas')
+    .select('puntos_costo, valor_monetario, activo')
+    .eq('id', recompensaId)
+    .single();
+  if (errorRecompensa) throw errorRecompensa;
+  if (!recompensa.activo) throw new Error('Esta recompensa ya no está disponible.');
+
+  const { data: usuario, error: errorUsuario } = await this.supabase
+    .from('usuarios')
+    .select('puntos, credito')
+    .eq('id', usuarioId)
+    .single();
+  if (errorUsuario) throw errorUsuario;
+
+  if ((usuario.puntos ?? 0) < recompensa.puntos_costo) {
+    throw new Error('No tenés puntos suficientes para esta recompensa.');
+  }
+
+  const puntosNuevos = usuario.puntos - recompensa.puntos_costo;
+  const creditoNuevo = (usuario.credito ?? 0) + recompensa.valor_monetario;
+
+  const { error: errorUpdate } = await this.supabase
+    .from('usuarios')
+    .update({ puntos: puntosNuevos, credito: creditoNuevo })
+    .eq('id', usuarioId);
+  if (errorUpdate) throw errorUpdate;
+
+  const { error: errorCanje } = await this.supabase
+    .from('canjes')
+    .insert([{ usuario_id: usuarioId, recompensa_id: recompensaId, puntos_gastados: recompensa.puntos_costo }]);
+  if (errorCanje) throw errorCanje;
+
+  return { puntos: puntosNuevos, credito: creditoNuevo };
+}
+
+async obtenerMisCanjes(usuarioId: string) {
+  const { data, error } = await this.supabase
+    .from('canjes')
+    .select('id, puntos_gastados, created_at, recompensas ( nombre )')
+    .eq('usuario_id', usuarioId)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data || [];
 }
 
 }

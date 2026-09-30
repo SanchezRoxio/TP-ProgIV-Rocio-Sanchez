@@ -28,12 +28,16 @@ export class PerfilComponent {
   colorOjos = signal<string>('');
   diasVacaciones = signal<number | string>('');
 
-  puntos = signal<number>(150);
+  puntos = signal<number>(0);
   credito = signal<number>(0);
   historialEntradas = signal<any[]>([]);
   errorDescarga = signal<string | null>(null);
   mensajeCancelacion = signal<string | null>(null);
   cuponBienvenida = signal<any>(null);
+
+  recompensasActivas = signal<any[]>([]);
+  misCanjes = signal<any[]>([]);
+  mensajeCanje = signal<string | null>(null);
 
   private authService = inject(AuthService);   // agregá este inject junto a los otros
 
@@ -50,10 +54,49 @@ export class PerfilComponent {
           this.colorOjos.set(usuario.color_ojos || 'No especificado');
           this.diasVacaciones.set(usuario.dias_vacaciones || 0);
           this.credito.set(usuario.credito || 0);
+          this.puntos.set(usuario.puntos || 0);
           this.cargarHistorial(usuario.id);
           this.cargarCuponBienvenida();
+          this.cargarRecompensas();
+          this.cargarMisCanjes(usuario.id);
         }
     });
+  }
+
+  private async cargarRecompensas() {
+    try {
+      const data = await this.authService.obtenerRecompensasActivas();
+      this.recompensasActivas.set(data || []);
+    } catch (err) {
+      console.error('Error al cargar recompensas:', err);
+    }
+  }
+
+  private async cargarMisCanjes(usuarioId: string) {
+    try {
+      const data = await this.authService.obtenerMisCanjes(usuarioId);
+      this.misCanjes.set(data || []);
+    } catch (err) {
+      console.error('Error al cargar mis canjes:', err);
+    }
+  }
+
+  puedeCanjear(recompensa: any): boolean {
+    return this.puntos() >= recompensa.puntos_costo;
+  }
+
+  async canjear(recompensa: any) {
+    try {
+      this.mensajeCanje.set(null);
+      const usuario = this.authService.usuarioActual();
+      const resultado = await this.authService.canjearRecompensa(usuario.id, recompensa.id);
+      this.puntos.set(resultado.puntos);
+      this.credito.set(resultado.credito);
+      this.mensajeCanje.set(`🎉 ¡Canjeaste "${recompensa.nombre}"! Se sumaron $${recompensa.valor_monetario} de crédito a tu cuenta.`);
+      await this.cargarMisCanjes(usuario.id);
+    } catch (err: any) {
+      this.mensajeCanje.set(`❌ ${err.message || 'No se pudo canjear la recompensa.'}`);
+    }
   }
 
   // solo tiene sentido mostrarlo si el usuario todavía no compró nada
@@ -131,12 +174,13 @@ private async cargarHistorial(usuarioId: string) {
   async cancelarCompra(item: any) {
     try {
       this.mensajeCancelacion.set(null);
-      const nuevoCredito = await this.authService.cancelarCompra(item.entradaId, this.authService.usuarioActual().id);
-      this.credito.set(nuevoCredito);
+      const resultado = await this.authService.cancelarCompra(item.entradaId, this.authService.usuarioActual().id);
+      this.credito.set(resultado.credito);
+      this.puntos.set(resultado.puntos);
       this.historialEntradas.update(lista =>
         lista.map(i => i.entradaId === item.entradaId ? { ...i, estado: 'cancelada' } : i)
       );
-      this.mensajeCancelacion.set(`✅ Compra cancelada. Se sumaron $${item.total} de crédito a tu cuenta.`);
+      this.mensajeCancelacion.set(`✅ Compra cancelada. Se sumaron $${item.total} de crédito a tu cuenta (y se te descontaron los puntos que había otorgado).`);
     } catch (err: any) {
       this.mensajeCancelacion.set(`❌ ${err.message || 'No se pudo cancelar la compra.'}`);
     }

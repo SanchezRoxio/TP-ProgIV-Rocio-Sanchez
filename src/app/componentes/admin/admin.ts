@@ -28,6 +28,7 @@ export class AdminComponent implements OnInit {
   comboForm!: FormGroup;
   cuponForm!: FormGroup;
   funcionEditForm!: FormGroup;
+  recompensaForm!: FormGroup;
 
   // funciones ya cargadas de cada pelicula, por pelicula_id -> lista.
   // se van completando de a una a medida que abrís el desplegable de cada pelicula
@@ -75,6 +76,11 @@ export class AdminComponent implements OnInit {
   candyMasVendido = signal<{ nombre: string; cantidad: number }[]>([]);
   private entradasReporte: any[] = []; // cache crudo, para no volver a pedirle a la db cuando cambiás semana/mes
 
+  // recompensas del programa de puntos
+  recompensasList = signal<any[]>([]);
+  editandoRecompensaId = signal<number | null>(null);
+  confirmandoBorrarRecompensaId = signal<number | null>(null);
+
   ngOnInit() {
     this.inicializarFormularios();
     this.cargarPeliculas();
@@ -85,6 +91,7 @@ export class AdminComponent implements OnInit {
     this.cargarCupones();
     this.cargarEmpleados();
     this.cargarReportes();
+    this.cargarRecompensas();
   }
 
   async cargarLogs() {
@@ -138,6 +145,12 @@ export class AdminComponent implements OnInit {
       horario: ['18:00', Validators.required],
       formato: ['2D', Validators.required],
       idioma: ['castellano', Validators.required]
+    });
+
+    this.recompensaForm = this.fb.group({
+      nombre: ['', Validators.required],
+      puntos_costo: [500, [Validators.required, Validators.min(1)]],
+      valor_monetario: [0, [Validators.required, Validators.min(1)]]
     });
   }
 
@@ -957,5 +970,102 @@ export class AdminComponent implements OnInit {
     const libro = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(libro, hoja, 'Facturación');
     XLSX.writeFile(libro, 'reporte-facturacion.xlsx');
+  }
+
+  // RECOMPENSAS (programa de puntos)
+
+  async cargarRecompensas() {
+    try {
+      const data = await this.authService.obtenerRecompensas();
+      this.recompensasList.set(data || []);
+    } catch (error) {
+      console.error('Error al cargar recompensas:', error);
+    }
+  }
+
+  async guardarRecompensa() {
+    if (this.recompensaForm.invalid) {
+      this.mensajeError.set('⚠️ Completa nombre, puntos y valor de la recompensa.');
+      return;
+    }
+
+    const formValues = this.recompensaForm.value;
+    const datosRecompensa = {
+      nombre: formValues.nombre,
+      puntos_costo: Number(formValues.puntos_costo),
+      valor_monetario: Number(formValues.valor_monetario)
+    };
+
+    try {
+      const id = this.editandoRecompensaId();
+
+      if (id) {
+        const recompensaOriginal = this.recompensasList().find(r => r.id === id);
+        await this.authService.actualizarRecompensa(id, { ...datosRecompensa, activo: recompensaOriginal?.activo ?? true });
+        this.mensajeExito.set('🎁 ¡Recompensa actualizada!');
+      } else {
+        await this.authService.crearRecompensa(datosRecompensa);
+        this.mensajeExito.set('🎁 ¡Recompensa creada!');
+      }
+
+      this.mensajeError.set(null);
+      this.recompensaForm.reset({ puntos_costo: 500, valor_monetario: 0 });
+      this.editandoRecompensaId.set(null);
+      await this.cargarRecompensas();
+    } catch (error: any) {
+      this.mensajeError.set('❌ Error al guardar la recompensa.');
+      this.mensajeExito.set(null);
+    }
+  }
+
+  editarRecompensa(recompensa: any) {
+    this.editandoRecompensaId.set(recompensa.id);
+    this.recompensaForm.patchValue({
+      nombre: recompensa.nombre,
+      puntos_costo: recompensa.puntos_costo,
+      valor_monetario: recompensa.valor_monetario
+    });
+  }
+
+  cancelarEdicionRecompensa() {
+    this.editandoRecompensaId.set(null);
+    this.recompensaForm.reset({ puntos_costo: 500, valor_monetario: 0 });
+  }
+
+  // en vez de borrar directo, se puede desactivar: asi los canjes viejos de
+  // esa recompensa mantienen su historial intacto
+  async toggleActivoRecompensa(recompensa: any) {
+    try {
+      await this.authService.actualizarRecompensa(recompensa.id, {
+        nombre: recompensa.nombre,
+        puntos_costo: recompensa.puntos_costo,
+        valor_monetario: recompensa.valor_monetario,
+        activo: !recompensa.activo
+      });
+      await this.cargarRecompensas();
+    } catch (error) {
+      this.mensajeError.set('❌ No se pudo cambiar el estado de la recompensa.');
+    }
+  }
+
+  pedirConfirmacionBorrarRecompensa(id: number) {
+    this.confirmandoBorrarRecompensaId.set(id);
+  }
+
+  cancelarBorrarRecompensa() {
+    this.confirmandoBorrarRecompensaId.set(null);
+  }
+
+  async borrarRecompensa(id: number) {
+    try {
+      await this.authService.eliminarRecompensa(id);
+      this.confirmandoBorrarRecompensaId.set(null);
+      this.mensajeExito.set('🗑️ Recompensa borrada.');
+      this.mensajeError.set(null);
+      await this.cargarRecompensas();
+    } catch (error: any) {
+      this.mensajeError.set('❌ No se pudo borrar: probablemente ya fue canjeada por algún usuario.');
+      this.mensajeExito.set(null);
+    }
   }
 }

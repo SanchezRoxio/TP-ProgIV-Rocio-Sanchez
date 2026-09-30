@@ -64,6 +64,10 @@ Al confirmar una compra, se genera automáticamente un PDF (con `jsPDF`) que se 
 
 En `/validar` (accesible para admins y para usuarios con rol `empleado`) hay una pantalla que lee el QR con la camara del dispositivo (librería `html5-qrcode`) o permite tipear el codigo a mano si el lector falla. Al encontrar la entrada, se puede marcar como "validada" (entro al cine) y, si compro candy o algun combo, marcar el candy como "entregado" por separado — son dos acciones independientes, porque el mismo QR se usa primero en la puerta del cine y despues en el candy bar, y una no debería bloquear a la otra. Cada acción, una vez hecha, no se puede repetir con esa misma entrada (el "QR deja de funcionar" para esa acción puntual). El admin puede asignar o sacar el rol de empleado a cualquier usuario ya registrado, desde la pestaña "Empleados" del panel.
 
+### Puntos de fidelización
+
+Por cada compra confirmada, un usuario registrado gana 1 punto por cada $ que termina pagando (ya con descuentos/credito aplicados; los invitados no acumulan). El admin crea "recompensas" desde su panel (nombre, cuantos puntos cuestan, cuanto valen), y el usuario las ve y las canjea desde su perfil. En vez de armar un sistema de vales separado, el canje usa el mismo mecanismo de credito de las cancelaciones: te descuenta los puntos y te suma esa plata como crédito para tu próxima compra, y queda una fila en el historial de canjes. Si cancelas una compra, tambien se te revierten los puntos que esa compra te habia dado (si no, podrias cancelar y quedarte con puntos "de la nada").
+
 ### Cancelación con crédito real
 
 Como las funciones son recurrentes (se repiten cada semana el mismo día y horario, no tienen una fecha puntual guardada en la base), para saber "cuánto falta para la función" calculo cuándo cae la próxima vez ese día+horario a partir de ahora mismo. Si todavía faltan 2 horas o más, el usuario puede cancelar su compra desde "Mis películas": la entrada se marca como cancelada, se liberan las butacas para que se puedan volver a vender, y en vez de devolverle la plata se le suma ese monto como crédito real a su cuenta (columna `credito` en `usuarios`, no un valor de mentira). Ese crédito se puede usar después en cualquier compra nueva, junto con otros métodos de pago (usa solo lo que haga falta para llegar a $0, el resto queda guardado para la próxima).
@@ -79,6 +83,10 @@ El admin tiene una pestaña de "Reportes & Logs" que muestra un registro de acci
 ### PWA
 
 La app se puede instalar como aplicación. El service worker solo se activa en el build de producción (`ng build`), para no complicar el desarrollo con contenido cacheado viejo. Cachea los archivos de la app (JS/CSS/imágenes) para que cargue rápido y funcione offline.
+
+### Alertas de "Próximamente"
+
+Cuando activas la alerta de una pelicula en "Proximamente" (`🔔 AVISARME`), queda guardada. Como no tengo backend propio, no hay forma de avisar si no se tiene la app abierta (eso necesitaria un servidor que mande push aunque estes offline) — lo que si hago es, cada vez que entras a `inicio`, comparar las alertas contra las peliculas que ya salieron de "Proximamente" (pasaron el umbral de los 7 dias de preventa) y todavia no avisaron. Si hay alguna, te aparece un cartel en pantalla y, si le diste permiso al navegador, también una notificación del sistema operativo, pedido justo cuando activás la alerta, no apenas entrás a la página. Cada alerta se marca como "ya notificada" en la base para no repetirte el mismo aviso en cada visita.
 
 ## Decisiones técnicas que tomé
 
@@ -102,6 +110,4 @@ Necesita un archivo de entorno con las credenciales de Supabase (`src/app/enviro
 
 ## Estado actual
 
-Lo que ya funciona: registro/login, cartelera con búsqueda y filtro de género múltiple, reseñas con promedio, "Proximamente" con alertas de estreno, preventa con precio especial, selección de butacas en tiempo real (generales/accesibles/VIP), compra completa (entradas + candy + combos) con generación automatica de PDF y QR, validación de esas entradas por empleados (cámara o código manual), cupones configurables con restricciones de edad y primera compra, restricción de edad para películas, cancelación de compras con crédito real (hasta 2 horas antes de la función), "Mis películas" (con re-descarga del PDF de cualquier compra vieja), reportes de facturación/películas más vistas/candy más vendido (con exportación a PDF y Excel), diseño responsive para el celu, instalación como PWA, y un panel de admin con CRUD completo de películas, funciones, salas, candy, combos, cupones y empleados, más log de auditoría.
-
-Lo que todavía falta: sistema de puntos de fidelización real.
+Lo que ya funciona: registro/login, cartelera con búsqueda y filtro de género múltiple, reseñas con promedio, "Proximamente" con alertas de estreno, preventa con precio especial, selección de butacas en tiempo real (generales/accesibles/VIP), compra completa (entradas + candy + combos) con generación automatica de PDF y QR, validación de esas entradas por empleados (cámara o código manual), cupones configurables con restricciones de edad y primera compra, restricción de edad para películas, cancelación de compras con crédito real (hasta 2 horas antes de la función), puntos de fidelizacion canjeables por recompensas, "Mis peliculas" (con re-descarga del PDF de cualquier compra vieja), reportes de facturación/peliculas más vistas/candy más vendido (con exportación a PDF y Excel), diseño responsive para el celu, instalación como PWA, y un panel de admin con CRUD completo de peliculas, funciones, salas, candy, combos, cupones, empleados y recompensas, más log de auditoría.
