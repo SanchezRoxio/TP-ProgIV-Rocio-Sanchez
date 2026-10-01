@@ -1,10 +1,10 @@
 # 🎬 Roxi's Movies
 
-Sistema de venta de entradas de cine, hecho para el TP de Programación IV. Es una app de Angular que se conecta directo a Supabase (base de datos + autenticación + tiempo real), sin backend propio.
+Sistema de venta de entradas de cine para el TP de Programación IV. Es una app de Angular que se conecta directo a Supabase (base de datos + autenticación + tiempo real), sin backend propio.
 
 ## ¿Qué hace?
 
-- Los usuarios pueden ver la cartelera, buscar películas por nombre, filtrar por uno o varios géneros a la vez, leer y dejar reseñas con estrellas (con promedio calculado), y comprar entradas eligiendo butaca (con mapa de sala en tiempo real).
+- Los usuarios pueden ver la cartelera, buscar películas por nombre, filtrar por uno o varios géneros a la vez, leer y dejar reseñas con estrellas (con promedio calculado), y comprar entradas eligiendo butaca.
 - Las butacas tienen 3 tipos: generales, accesibles (fila especial para personas con discapacidad) y VIP (últimas 3 filas, precio más alto), cada una marcada con un color distinto y con una leyenda que explica qué significa cada color. Si elegís una butaca VIP, te avisa antes de pagar.
 - En la home se destacan primero las 3 películas más vendidas, hay una sección de "Próximamente" (con alertas para cuando se habilite la venta) y un sistema de preventa con precio especial los 7 días previos al estreno.
 - Los usuarios registrados tienen una sección "Mis películas" con el historial de todo lo que vieron, con póster, fecha y su propia calificación.
@@ -13,7 +13,7 @@ Sistema de venta de entradas de cine, hecho para el TP de Programación IV. Es u
 - Se puede comprar sin estar registrado (como invitado), aunque registrarse trae beneficios (como poder usar cupones restringidos).
 - Hay un panel de administración completo con CRUD (crear, editar, borrar) de películas, funciones, salas, candy, combos y cupones, más un log de auditoría que registra quién hizo qué acción y cuándo.
 
-## Cómo está armado
+## Cómo está armado?
 
 ### Angular sin backend propio
 
@@ -45,7 +45,7 @@ Cuando alguien confirma una compra, se guarda de verdad en la base: qué funció
 
 ### Combos con entrada incluida
 
-El mail del cliente pedía "combos especiales: entrada + pochoclos + bebida a un precio fijo". Cada combo cubre el precio de una butaca (además del candy que incluya): si elegís 2 combos, las primeras 2 butacas de tu selección se cobran a $0 en la base, porque su costo ya está adentro del precio fijo del combo, que se guarda aparte en `entrada_combos`.
+"Combos especiales: entrada + pochoclos + bebida a un precio fijo". Cada combo cubre el precio de una butaca (además del candy que incluya): si elegís 2 combos, las primeras 2 butacas de la selección se cobran a $0 en la base, porque su costo ya está adentro del precio fijo del combo, que se guarda aparte en `entrada_combos`.
 
 ### Cupones con reglas de negocio reales
 
@@ -58,7 +58,7 @@ Un invitado sin cuenta nunca puede usar los cupones de los tipos 2 y 3, porque n
 
 ### Entrada con QR y PDF
 
-Al confirmar una compra, se genera automáticamente un PDF (con `jsPDF`) que se descarga solo, con los datos de la función, las butacas, el total pagado y un código QR (generado con la librería `qrcode`) que codifica un texto simple tipo `ENTRADA-123`. Si la película tiene restricción de edad, el PDF también lo aclara. Ese mismo código se puede volver a descargar en cualquier momento desde "Mis películas" en el perfil. El código es texto plano a propósito, para que un empleado lo pueda tipear a mano si el lector de QR falla ese día (como pide la consigna).
+Al confirmar una compra, se genera automáticamente un PDF (con `jsPDF`) que se descarga solo, con los datos de la función, las butacas, el total pagado y un código QR (generado con la librería `qrcode`) que codifica un texto simple tipo `ENTRADA-123`. Si la película tiene restricción de edad, el PDF también lo aclara. Ese mismo código se puede volver a descargar en cualquier momento desde "Mis películas" en el perfil. El código es texto plano a propósito, para que un empleado lo pueda tipear a mano si el lector de QR falla ese día.
 
 ### Validación de entradas por empleados
 
