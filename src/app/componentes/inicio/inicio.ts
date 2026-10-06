@@ -114,7 +114,7 @@ export class InicioComponent implements OnInit {
     return this.peliculas().filter(p => p.fecha_estreno && this.diasHastaEstreno(p.fecha_estreno) > 7);
   });
 
-  // Sin fecha de estreno, o a 7 días o menos (entró en preventa), o ya estrenada
+  // Sin fecha de estreno, o a 7 días o menos (entró en preventa), o ya publicada
   peliculasCartelera = computed(() => {
     return this.peliculas().filter(p => !p.fecha_estreno || this.diasHastaEstreno(p.fecha_estreno) <= 7);
   });

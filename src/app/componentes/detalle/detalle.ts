@@ -144,11 +144,13 @@ export class DetalleComponent implements OnInit {
       return;
     }
 
-    if (usuarioLogueado.fecha_nacimiento) {// USUARIO REGISTRADO: Validamos su edad 
+    if (usuarioLogueado.fecha_nacimiento) {// USUARIO REGISTRADO: Validamos su edad
       const edadUsuario = this.calcularEdad(usuarioLogueado.fecha_nacimiento);
-     
-      if (edadUsuario < 18 || (edadMinima > 0 && edadUsuario < edadMinima)) { // Si es menor de edad, NO PUEDE COMPRAR
-        this.avisoRestriccion.set('❌ COMPRA DENEGADA: Los menores de edad no pueden realizar compras de entradas.');
+
+      // solo bloqueamos si la pelicula tiene restriccion de edad (edadMinima > 0)
+      // y el usuario no la cumple. Las ATP (edadMinima = 0) nunca se bloquean acá
+      if (edadMinima > 0 && edadUsuario < edadMinima) {
+        this.avisoRestriccion.set(`❌ COMPRA DENEGADA: esta película es +${edadMinima}, no cumplís la edad mínima para comprar la entrada.`);
         return;
       }
     } else {
