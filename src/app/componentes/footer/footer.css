@@ -1,0 +1,37 @@
+.pixel-footer {
+  background-color: #000;
+  border-top: 4px solid #ff0055;
+  color: #00ffcc;
+  font-family: 'Press Start 2P', monospace;
+  text-align: center;
+  padding: 20px 12px;
+  font-size: 13px;
+  line-height: 1.8;
+  margin-top: 40px;
+}
+
+.footer-sub {
+  color: #888;
+  font-size: 12px;
+}
+
+.footer-contacto {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.footer-contacto a {
+  color: #00ffcc;
+  text-decoration: none;
+  font-size: 12px;
+  border: 2px solid #00ffcc;
+  padding: 6px 10px;
+}
+
+.footer-contacto a:hover {
+  background-color: #00ffcc;
+  color: #000;
+}

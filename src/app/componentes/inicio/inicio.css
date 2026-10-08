@@ -41,7 +41,11 @@
   font-size: 22px;
   text-shadow: 4px 4px 0px #ff0055;
   letter-spacing: 2px;
-  margin-right: 30%;
+  /* ocupa SIEMPRE su propia fila entera (no solo en mobile): como el
+     contenedor es flex-wrap, esto empuja a los botones de nav a la fila de
+     abajo en cualquier ancho de pantalla, no solo por debajo de los 600px */
+  width: 100%;
+  margin: 0 0 10px 0;
 }
 
 .section-subtitle {
@@ -252,18 +256,15 @@
     text-align: center;
   }
 
-  .main-title {
-    font-size: 16px;
-    margin-right: 0;
-    letter-spacing: 1px;
-  }
-
   .pixel-card {
     padding: 15px;
   }
 
+  /* relacion de aspecto tipo poster de cine (2:3) en vez de una altura fija:
+     recorta mucho menos la imagen real que una altura pareja para todas */
   .peli-poster {
-    height: 220px;
+    height: auto;
+    aspect-ratio: 2 / 3;
   }
 
   .top-grid, .catalogo-grid {
